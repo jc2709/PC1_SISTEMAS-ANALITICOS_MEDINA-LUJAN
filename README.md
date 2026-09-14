@@ -10,11 +10,11 @@ Construir una aplicación ejecutiva que conecte organizaciones, planes, objetivo
 
 - **Frontend compartido:** React, TypeScript, Vite y Tailwind CSS.
 - **Visualización:** Recharts o Chart.js, cuando se incorporen indicadores reales.
-- **Aplicación Windows:** contenedor de escritorio por validar mediante un prototipo temprano.
-- **Persistencia local:** una abstracción común con IndexedDB para HTML y SQLite para escritorio.
+- **Aplicación Windows:** prototipo portable validado con Electron.
+- **Persistencia local:** abstracción común con IndexedDB; SQLite queda reservado para una fase posterior si el alcance lo requiere.
 - **IA:** API propia desplegable en Vercel que protegerá la clave de Gemini. El frontend nunca contendrá secretos.
 
-La Fase 0 solo implementa la base del frontend. No hay backend, persistencia ni conexión con Gemini todavía.
+Hasta la Fase 2 hay frontend, persistencia mínima y entregables locales; todavía no hay backend ni conexión con Gemini.
 
 ## Estructura actual
 
@@ -22,6 +22,7 @@ La Fase 0 solo implementa la base del frontend. No hay backend, persistencia ni 
 .
 ├── docs/
 │   └── evidencias/       # Registro verificable de cada fase
+├── desktop/              # Contenedor Electron para Windows
 ├── frontend/
 │   ├── public/           # Recursos estáticos
 │   └── src/
@@ -32,6 +33,7 @@ La Fase 0 solo implementa la base del frontend. No hay backend, persistencia ni 
 │       ├── storage/      # Abstracción y proveedores de almacenamiento
 │       ├── test/         # Configuración y pruebas
 │       └── types/        # Modelos TypeScript iniciales
+├── scripts/              # Construcción y verificación de entregables
 ├── .env.example          # Nombres de variables, nunca secretos
 ├── .gitignore
 └── package.json          # Comandos del proyecto
@@ -56,7 +58,7 @@ npm test
 npm run build
 ```
 
-El resultado de producción queda en `frontend/dist/`. La apertura directa mediante `file://` y el ejecutable Windows se validarán en la Fase 2.
+El resultado de producción queda en `frontend/dist/`. La apertura directa mediante `file://` y el ejecutable Windows fueron validados en la Fase 2.
 
 ## Fases
 
@@ -64,7 +66,7 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 | --- | --- | --- |
 | 0 | Fundación del repositorio | Completada |
 | 1 | Shell visual y almacenamiento mínimo | Completada |
-| 2 | Prototipo HTML local y prototipo EXE | Pendiente |
+| 2 | Prototipo HTML local y prototipo EXE | Completada con observación |
 | 3 | Organizaciones y planes | Pendiente |
 | 4 | Integración Gemini y backend Vercel | Pendiente |
 | 5 | Planeamiento estratégico | Pendiente |
@@ -79,6 +81,19 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 
 ## Estado actual
 
-**Fase 1 — Shell y almacenamiento mínimo:** la aplicación inicializa IndexedDB, conserva la última sección visitada y permite guardar la preferencia de navegación compacta. Si IndexedDB no está disponible, la interfaz continúa con almacenamiento temporal y muestra una advertencia controlada. Inicio y Configuración son funcionales; los demás módulos continúan señalados como próximas funcionalidades.
+**Fase 2 — HTML local y EXE:** el frontend genera un `index.html` autocontenido y una aplicación Windows portable basada en Electron. La versión recomendada para Windows se distribuye como ZIP extraíble porque el envoltorio EXE autocontenido sin certificado activa SmartScreen en este equipo.
 
-Consulte [docs/evidencias/FASE_01.md](docs/evidencias/FASE_01.md) para ver las decisiones, pruebas y modo de uso de esta entrega.
+Consulte [docs/evidencias/FASE_02.md](docs/evidencias/FASE_02.md) para ver las decisiones, pruebas y modo de uso de esta entrega.
+
+## Generar HTML y aplicación Windows
+
+```bash
+npm run build:html
+npm run build:exe
+npm run verify:exe
+```
+
+- HTML autocontenido: `frontend/dist/index.html`.
+- Aplicación Windows: `release/exe/win-unpacked/GestionControlEstrategicoIA.exe`.
+
+Para distribuir la versión Windows, comprima el contenido completo de `win-unpacked`; el EXE depende de los archivos de runtime incluidos en esa misma carpeta. No requiere instalar Node.js ni npm en la computadora de destino.

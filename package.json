@@ -1,13 +1,53 @@
 {
   "name": "gestion-control-estrategico-ia",
   "private": true,
-  "version": "0.2.0",
-  "workspaces": ["frontend"],
+  "version": "0.3.0",
+  "description": "Planeamiento estratégico y Balanced Scorecard asistidos por IA",
+  "author": "Medina - Luján",
+  "main": "desktop/main.cjs",
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
     "dev": "npm run dev --workspace frontend",
     "build": "npm run build --workspace frontend",
+    "build:html": "npm run build --workspace frontend",
+    "postbuild:html": "node scripts/build-html/verify.mjs",
+    "prebuild:exe": "npm run build:html",
+    "build:exe": "electron-builder --win --dir --x64",
+    "verify:exe": "pwsh -NoProfile -File scripts/build-exe/verify.ps1",
+    "predesktop": "npm run build:html",
+    "desktop": "electron .",
     "test": "npm run test --workspace frontend",
     "lint": "npm run lint --workspace frontend"
   },
-  "engines": { "node": ">=22.12.0" }
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "build": {
+    "appId": "pe.edu.gceia.app",
+    "productName": "Gestión y Control Estratégico IA",
+    "executableName": "GestionControlEstrategicoIA",
+    "artifactName": "GestionControlEstrategicoIA.${ext}",
+    "asar": false,
+    "compression": "store",
+    "directories": {
+      "output": "release/exe"
+    },
+    "files": [
+      "desktop/**/*",
+      "frontend/dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "dir"
+      ],
+      "signAndEditExecutable": false
+    }
+  },
+  "devDependencies": {
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3"
+  }
 }
