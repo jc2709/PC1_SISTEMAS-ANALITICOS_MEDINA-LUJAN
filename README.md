@@ -28,6 +28,8 @@ La Fase 0 solo implementa la base del frontend. No hay backend, persistencia ni 
 │       ├── components/   # Componentes reutilizables
 │       ├── layouts/      # Estructura visual principal
 │       ├── pages/        # Pantallas funcionales
+│       ├── hooks/        # Estado y preferencias de la interfaz
+│       ├── storage/      # Abstracción y proveedores de almacenamiento
 │       ├── test/         # Configuración y pruebas
 │       └── types/        # Modelos TypeScript iniciales
 ├── .env.example          # Nombres de variables, nunca secretos
@@ -61,7 +63,7 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 | Fase | Alcance | Estado |
 | --- | --- | --- |
 | 0 | Fundación del repositorio | Completada |
-| 1 | Shell visual y almacenamiento mínimo | Pendiente |
+| 1 | Shell visual y almacenamiento mínimo | Completada |
 | 2 | Prototipo HTML local y prototipo EXE | Pendiente |
 | 3 | Organizaciones y planes | Pendiente |
 | 4 | Integración Gemini y backend Vercel | Pendiente |
@@ -77,6 +79,6 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 
 ## Estado actual
 
-**Fase 0 — Fundación:** interfaz Inicio, navegación visual, modelos mínimos `Organization` y `StrategicPlan`, configuración de calidad y documentación. Los contadores son marcadores en cero y las opciones distintas de Inicio están señaladas como próximas funcionalidades.
+**Fase 1 — Shell y almacenamiento mínimo:** la aplicación inicializa IndexedDB, conserva la última sección visitada y permite guardar la preferencia de navegación compacta. Si IndexedDB no está disponible, la interfaz continúa con almacenamiento temporal y muestra una advertencia controlada. Inicio y Configuración son funcionales; los demás módulos continúan señalados como próximas funcionalidades.
 
-Consulte [docs/evidencias/FASE_00.md](docs/evidencias/FASE_00.md) para ver las decisiones y verificaciones de esta entrega.
+Consulte [docs/evidencias/FASE_01.md](docs/evidencias/FASE_01.md) para ver las decisiones, pruebas y modo de uso de esta entrega.

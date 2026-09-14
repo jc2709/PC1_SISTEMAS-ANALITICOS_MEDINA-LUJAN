@@ -19,3 +19,9 @@ export interface StrategicPlan {
   createdAt: string
   updatedAt: string
 }
+
+export interface AppPreferences {
+  schemaVersion: 1
+  compactSidebar: boolean
+  lastSection: string
+}

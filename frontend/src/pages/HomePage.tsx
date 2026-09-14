@@ -1,8 +1,10 @@
 import { BarChart3, Building2, ClipboardList, Flag, Sparkles, Target } from 'lucide-react'
 import type { NavigationItem } from '../App'
 import { StatCard } from '../components/StatCard'
+import { StorageBadge } from '../components/StorageBadge'
+import type { StorageMode } from '../storage/StorageProvider'
 
-interface HomePageProps { selectedSection: NavigationItem }
+interface HomePageProps { selectedSection: NavigationItem; storageMode: StorageMode }
 
 const stats = [
   { label: 'Organizaciones', icon: Building2, description: 'Entidades registradas', accent: 'bg-cyan-brand' },
@@ -12,7 +14,7 @@ const stats = [
   { label: 'Iniciativas', icon: Flag, description: 'Iniciativas estratégicas', accent: 'bg-emerald-500' },
 ] as const
 
-export function HomePage({ selectedSection }: HomePageProps) {
+export function HomePage({ selectedSection, storageMode }: HomePageProps) {
   const isFutureSection = selectedSection !== 'Inicio'
 
   return (
@@ -23,7 +25,10 @@ export function HomePage({ selectedSection }: HomePageProps) {
           <h1 className="mt-3 max-w-4xl text-3xl font-bold tracking-[-0.035em] text-slate-950 sm:text-4xl">GESTIÓN Y CONTROL ESTRATÉGICO IA</h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500 sm:text-base">Planeamiento Estratégico y Balanced Scorecard asistidos por Inteligencia Artificial</p>
         </div>
-        <div className="flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-500 shadow-sm"><span className="size-2 rounded-full bg-slate-400" />IA: No configurada</div>
+        <div className="flex flex-wrap gap-2">
+          <StorageBadge mode={storageMode} />
+          <div className="flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-500 shadow-sm"><span className="size-2 rounded-full bg-slate-400" />IA: No configurada</div>
+        </div>
       </div>
 
       {isFutureSection ? (
@@ -47,9 +52,9 @@ export function HomePage({ selectedSection }: HomePageProps) {
         <article className="relative min-h-72 overflow-hidden rounded-3xl bg-navy-900 p-7 text-white shadow-[0_18px_50px_rgba(7,20,38,0.18)] sm:p-9">
           <div className="absolute -right-20 -top-28 size-80 rounded-full border-[54px] border-cyan-brand/10" />
           <div className="relative max-w-xl">
-            <span className="inline-flex rounded-full bg-cyan-brand/15 px-3 py-1.5 text-xs font-bold text-cyan-300 ring-1 ring-cyan-brand/20">FASE 0 · FUNDACIÓN</span>
-            <h2 className="mt-5 text-2xl font-bold tracking-tight sm:text-3xl">Tu centro estratégico está listo para comenzar.</h2>
-            <p className="mt-4 text-sm leading-6 text-slate-300">La estructura base, la navegación y los controles de calidad ya están preparados. Los datos y flujos funcionales se incorporarán de manera progresiva.</p>
+            <span className="inline-flex rounded-full bg-cyan-brand/15 px-3 py-1.5 text-xs font-bold text-cyan-300 ring-1 ring-cyan-brand/20">FASE 1 · BASE LOCAL</span>
+            <h2 className="mt-5 text-2xl font-bold tracking-tight sm:text-3xl">Tu espacio estratégico ya recuerda tus preferencias.</h2>
+            <p className="mt-4 text-sm leading-6 text-slate-300">La navegación y la configuración visual se guardan localmente en este dispositivo, sin enviar información a servicios externos.</p>
           </div>
         </article>
         <article className="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-[0_8px_28px_rgba(15,23,42,0.05)]">
@@ -59,11 +64,11 @@ export function HomePage({ selectedSection }: HomePageProps) {
             {[
               ['Interfaz principal', 'Disponible'],
               ['Modelos iniciales', 'Preparados'],
-              ['Persistencia local', 'Próxima fase'],
-            ].map(([label, status], index) => (
+              ['Persistencia local', 'Disponible'],
+            ].map(([label, status]) => (
               <div className="flex items-center justify-between gap-4" key={label}>
                 <span className="text-sm font-medium text-slate-500">{label}</span>
-                <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${index < 2 ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{status}</span>
+                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">{status}</span>
               </div>
             ))}
           </div>
