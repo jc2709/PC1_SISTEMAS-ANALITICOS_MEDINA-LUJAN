@@ -23,7 +23,7 @@ El archivo `GestionControlEstrategicoIA.html`. Se abre con doble clic en un nave
 
 ### Aplicación Windows
 
-El paquete `GestionControlEstrategicoIA-Windows.zip`. Después de extraerlo, se abre `GestionControlEstrategicoIA.exe`; no requiere Node.js, npm, Python, servidor, terminal ni instalación.
+El archivo único `GestionControlEstrategicoIA.exe`. Puede copiarse por sí solo y no requiere Node.js, npm, Python, servidor, terminal, instalación ni archivos auxiliares visibles.
 
 ## Cómo debe funcionar
 
@@ -45,11 +45,10 @@ El paquete `GestionControlEstrategicoIA-Windows.zip`. Después de extraerlo, se 
 
 ### Windows
 
-1. Extraer completamente `GestionControlEstrategicoIA-Windows.zip`.
-2. No mover únicamente el EXE fuera de su carpeta.
-3. Abrir `GestionControlEstrategicoIA.exe`.
-4. Confirmar el dashboard y `Datos locales: Listos`.
-5. Cambiar la navegación compacta, cerrar y volver a abrir para comprobar persistencia.
+1. Copiar únicamente `GestionControlEstrategicoIA.exe` a una carpeta distinta.
+2. Abrir `GestionControlEstrategicoIA.exe` con doble clic.
+3. Confirmar el dashboard y `Datos locales: Listos`.
+4. Cambiar la navegación compacta, cerrar y volver a abrir para comprobar persistencia.
 
 ## Archivos principales creados o modificados
 
@@ -67,8 +66,9 @@ El paquete `GestionControlEstrategicoIA-Windows.zip`. Después de extraerlo, se 
 
 - `npm run build:html`: correcto; HTML único de aproximadamente 272 KiB.
 - Verificación de autocontenido: correcta, sin referencias CSS/JS externas.
-- `npm run build:exe`: correcto; carpeta portable Windows x64 generada.
-- Smoke test del EXE: `ok: true`; título, dashboard, estado local e IndexedDB correctos.
+- `npm run build:exe`: genera el EXE portable de archivo único para Windows x64.
+- `npm run build:exe:unpacked`: conserva la carpeta expandida únicamente como respaldo técnico.
+- Smoke test del EXE aislado: valida título, dashboard, estado local, IndexedDB y ausencia de archivos auxiliares junto al ejecutable.
 - Ejecución normal del EXE en carpeta: ventana visible, título correcto y proceso respondiendo.
 - Lint, pruebas unitarias y build TypeScript: correctos.
 
@@ -76,18 +76,19 @@ El paquete `GestionControlEstrategicoIA-Windows.zip`. Después de extraerlo, se 
 
 - Python no estaba instalado. Se eligió Electron porque empaqueta el runtime y reutiliza el frontend sin exigir dependencias al usuario.
 - La compresión del ejecutable autocontenido era muy lenta en este equipo. Se validó con compresión `store`.
-- Microsoft SmartScreen bloqueó el envoltorio EXE autocontenido por no tener un certificado de firma de código. No se desactivó ni eludió la protección. La entrega recomendada es la carpeta portable dentro de un ZIP.
+- Microsoft SmartScreen puede advertir o bloquear el EXE autocontenido por no tener un certificado de firma de código. No se desactivó ni eludió la protección; la advertencia se documenta por separado y no cambia el formato exigido de la entrega.
 - El smoke test se ejecutaba antes de terminar la inicialización de React; ahora espera el estado local hasta cinco segundos y usa un perfil aislado.
 - Se mantuvo una referencia global de `BrowserWindow` para asegurar su ciclo de vida.
 
 ## Decisiones técnicas
 
 - Electron queda validado para el prototipo, pero la elección definitiva podrá reevaluarse antes del empaquetado final.
-- Los recursos se distribuyen expandidos dentro de la carpeta portable: evita un fallo de carga observado con ASAR y no cambia la experiencia del usuario, que recibe un único ZIP.
+- El target `portable` de `electron-builder` encapsula la aplicación y su runtime en un solo EXE; los recursos se extraen temporalmente durante la ejecución.
+- `win-unpacked` permanece disponible solo como respaldo técnico durante el desarrollo.
 - No se incluye un certificado autofirmado porque no elimina correctamente SmartScreen y obligaría al usuario a confiar manualmente en él.
 - Los binarios generados están ignorados por Git y se distribuyen como artefactos, no como código fuente.
 - No se implementó SQLite ni lógica funcional de organizaciones, conforme al alcance.
 
 ## Estado final
 
-Fase 2 completada con observación: el HTML y el EXE en carpeta funcionan; el EXE autocontenido sin firma es bloqueado por SmartScreen en este equipo. El avance a la Fase 3 requiere autorización explícita.
+Fase 2 completada con observación: el HTML y el EXE portátil de archivo único funcionan localmente; falta probar el EXE en otra PC física y la firma digital continúa pendiente. El avance a la Fase 3 requiere autorización explícita.

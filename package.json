@@ -14,7 +14,9 @@
     "build:html": "npm run build --workspace frontend",
     "postbuild:html": "node scripts/build-html/verify.mjs",
     "prebuild:exe": "npm run build:html",
-    "build:exe": "electron-builder --win --dir --x64",
+    "build:exe": "electron-builder --win portable --x64",
+    "prebuild:exe:unpacked": "npm run build:html",
+    "build:exe:unpacked": "electron-builder --win --dir --x64",
     "verify:exe": "pwsh -NoProfile -File scripts/build-exe/verify.ps1",
     "predesktop": "npm run build:html",
     "desktop": "electron .",
@@ -41,7 +43,7 @@
     ],
     "win": {
       "target": [
-        "dir"
+        "portable"
       ],
       "signAndEditExecutable": false
     }

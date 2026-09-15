@@ -81,7 +81,7 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 
 ## Estado actual
 
-**Fase 2 — HTML local y EXE:** el frontend genera un `index.html` autocontenido y una aplicación Windows portable basada en Electron. La versión recomendada para Windows se distribuye como ZIP extraíble porque el envoltorio EXE autocontenido sin certificado activa SmartScreen en este equipo.
+**Fase 2 — HTML local y EXE:** el frontend genera un `index.html` autocontenido y un único `GestionControlEstrategicoIA.exe` portable basado en Electron. `win-unpacked` se conserva solo como respaldo técnico de desarrollo.
 
 Consulte [docs/evidencias/FASE_02.md](docs/evidencias/FASE_02.md) para ver las decisiones, pruebas y modo de uso de esta entrega.
 
@@ -94,6 +94,7 @@ npm run verify:exe
 ```
 
 - HTML autocontenido: `frontend/dist/index.html`.
-- Aplicación Windows: `release/exe/win-unpacked/GestionControlEstrategicoIA.exe`.
+- Aplicación Windows principal: `release/exe/GestionControlEstrategicoIA.exe`.
+- Respaldo técnico: `release/exe/win-unpacked/GestionControlEstrategicoIA.exe`.
 
-Para distribuir la versión Windows, comprima el contenido completo de `win-unpacked`; el EXE depende de los archivos de runtime incluidos en esa misma carpeta. No requiere instalar Node.js ni npm en la computadora de destino.
+El EXE principal puede copiarse por sí solo a otra carpeta o PC. No requiere instalar Node.js, npm o Python. El respaldo `win-unpacked` no forma parte de la distribución principal.
