@@ -94,7 +94,14 @@ Por solicitud expresa del usuario, las fases 6, 7, 8 y 9 se implementaron y vali
 - 20 pruebas de frontend aprobadas y 6 pruebas del endpoint aprobadas.
 - Build de producción y lint completados sin errores ni advertencias.
 - Servidor local y módulo BSC verificados con HTTP 200.
+- Commit funcional `63799c1` publicado en GitHub.
+- Producción verificada con HTTP 200 y presencia de BSC, Gantt, Simulación y Dashboard.
+- Backend de Gemini verificado después del despliegue con HTTP 200 y estado `ready`.
 
 ## Versión
 
 Versión funcional `0.9.0`. No se creó ningún tag automáticamente.
+
+## Estado final
+
+Fases 6, 7, 8 y 9 implementadas, probadas y desplegadas como un único bloque integrado.
