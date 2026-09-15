@@ -65,6 +65,10 @@ Puedes abrir `Planeamiento`, crear o elegir un plan y pulsar `Formular`. Desde a
 - 14 pruebas de frontend y 6 pruebas del endpoint aprobadas.
 - Lint y validación TypeScript sin advertencias.
 - Build de producción generado correctamente; no se regeneró el EXE por acuerdo con el usuario.
+- Servidor local verificado con HTTP 200 y contenedor React disponible.
+- Commit funcional `715ec21` publicado en GitHub y detectado en producción mediante el texto propio de la Fase 5.
+- `https://pc1-medina-lujan.vercel.app` verificado con HTTP 200 después del despliegue.
+- Backend publicado verificado con HTTP 200 y estado `ready` después del despliegue.
 
 ## Decisiones técnicas
 
@@ -75,4 +79,4 @@ Puedes abrir `Planeamiento`, crear o elegir un plan y pulsar `Formular`. Desde a
 
 ## Estado final
 
-Fase 5 implementada y probada. El planeamiento puede formularse completamente sin IA; la IA aprobada se reutiliza solo mediante una acción humana explícita y queda sujeta a revisión antes del guardado.
+Fase 5 implementada, probada y desplegada. El planeamiento puede formularse completamente sin IA; la IA aprobada se reutiliza solo mediante una acción humana explícita y queda sujeta a revisión antes del guardado.
