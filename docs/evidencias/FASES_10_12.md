@@ -59,9 +59,18 @@ Resultado de la primera validación completa:
 
 - lint y TypeScript: OK;
 - frontend: 7 archivos y 23 pruebas aprobadas;
-- API: 2 archivos y 9 pruebas aprobadas;
+- API: 2 archivos y 11 pruebas aprobadas;
 - build HTML autocontenido: OK;
 - auditoría npm: 0 vulnerabilidades conocidas.
+
+La verificación posterior al despliegue confirmó:
+
+- aplicación publicada con el módulo **Reportes** visible;
+- endpoint `/api/ai/explain-dashboard` activo;
+- narrativa real generada mediante contingencia `gemini-flash-latest`;
+- separación visible de Dato, Inferencia, Pronóstico y Recomendación;
+- aprobación humana persistida y disponible para reportes;
+- consola del navegador sin errores.
 
 ## Prueba manual
 
