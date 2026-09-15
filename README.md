@@ -2,6 +2,8 @@
 
 Sistema local para formular, ejecutar y monitorear el planeamiento estratégico y el Balanced Scorecard de múltiples organizaciones, con asistencia de inteligencia artificial bajo control humano.
 
+Aplicación web: https://pc1-medina-lujan.vercel.app
+
 ## Objetivo
 
 Construir una aplicación ejecutiva que conecte organizaciones, planes, objetivos, KPI, metas, iniciativas, escenarios y resultados. Sus funciones principales operarán localmente incluso cuando la IA no esté disponible.
@@ -14,7 +16,7 @@ Construir una aplicación ejecutiva que conecte organizaciones, planes, objetivo
 - **Persistencia local:** abstracción común con IndexedDB; SQLite queda reservado para una fase posterior si el alcance lo requiere.
 - **IA:** API propia desplegable en Vercel que protege la clave de Gemini, valida respuestas estructuradas y mantiene cada propuesta bajo decisión humana.
 
-Hasta la Fase 4 hay frontend, persistencia local, organizaciones, planes, backend seguro para Gemini, control humano de propuestas y bitácora de IA. La conexión real se habilita al desplegar el backend y configurar la clave privada en Vercel.
+Hasta la Fase 4 hay frontend, persistencia local, organizaciones, planes, backend seguro para Gemini, control humano de propuestas y bitácora de IA. El frontend y el backend están desplegados en Vercel; la generación real con Gemini se habilita al configurar la clave privada en Vercel.
 
 ## Estructura actual
 

@@ -65,13 +65,16 @@ Sin un backend desplegado puedes abrir el módulo IA, consultar su estado, confi
 - Build de HTML autocontenido para comprobar compatibilidad; no se regeneró el entregable final por acuerdo con el usuario.
 - 11 pruebas de frontend y 3 pruebas del endpoint aprobadas.
 - Servidor local verificado con respuesta HTTP 200 y contenedor React presente.
+- Despliegue de producción `f5c780e` verificado en estado `Ready`.
+- `https://pc1-medina-lujan.vercel.app` verificado visualmente sin errores de consola.
+- `GET /api/ai/strategic-analysis` verificado con HTTP 200 y estado seguro `not_configured` sin exponer secretos.
 
 ## Problemas y soluciones
 
 - La configuración de pruebas del API no resolvía Vitest desde la raíz del monorepo. Se ubicó junto al workspace frontend y se estableció explícitamente la raíz del repositorio.
 - La actualización normal del lockfile quedó esperando red. Se interrumpió sin cambios parciales y se actualizó en modo offline, ya que no se añadieron paquetes.
 - El lint detectó una actualización inmediata de estado dentro de un efecto. La comprobación automática ahora actualiza el estado únicamente al resolver la solicitud asíncrona.
-- La herramienta de navegador automatizado no está instalada en este entorno. La verificación se completó con el flujo integral de Testing Library, el build y una comprobación HTTP del servidor local.
+- Vercel fallaba porque el lockfile generado en Windows omitía el binario opcional `@tailwindcss/oxide-linux-x64-gnu`. Se declaró explícitamente como dependencia opcional, junto con `lightningcss-linux-x64-gnu`, y el siguiente despliegue quedó `Ready`.
 
 ## Decisiones técnicas
 
@@ -83,4 +86,4 @@ Sin un backend desplegado puedes abrir el módulo IA, consultar su estado, confi
 
 ## Estado final
 
-Fase 4 implementada y verificable con pruebas automatizadas. La conexión real queda disponible al desplegar el backend y configurar las variables privadas según el manual.
+Fase 4 implementada, probada y desplegada en `https://pc1-medina-lujan.vercel.app`. La aplicación web y el endpoint seguro están disponibles; únicamente queda configurar `GEMINI_API_KEY` en Vercel para activar la generación real.
