@@ -126,6 +126,110 @@ export interface StrategicPlanning {
   updatedAt: string
 }
 
+export type BalancedScorecardPerspective = 'FINANCIAL' | 'CUSTOMER' | 'INTERNAL_PROCESS' | 'LEARNING_GROWTH'
+export type KPIDirection = 'HIGHER_IS_BETTER' | 'LOWER_IS_BETTER' | 'TARGET'
+export type KPIStatus = 'GREEN' | 'AMBER' | 'RED' | 'GRAY'
+export type InitiativeStatus = 'PLANNED' | 'IN_PROGRESS' | 'BLOCKED' | 'COMPLETED' | 'CANCELLED'
+export type ScenarioKind = 'BASE' | 'PROTECTION' | 'EXPANSION' | 'CUSTOM'
+
+export interface StrategicObjective {
+  id: string
+  name: string
+  description: string
+  perspective: BalancedScorecardPerspective
+  owner: string
+  priority: 'HIGH' | 'MEDIUM' | 'LOW'
+}
+
+export interface ObjectiveRelationship {
+  id: string
+  sourceObjectiveId: StrategicObjective['id']
+  targetObjectiveId: StrategicObjective['id']
+  description: string
+  confidence: number
+  approved: boolean
+}
+
+export interface KPI {
+  id: string
+  objectiveId: StrategicObjective['id']
+  name: string
+  description: string
+  purpose: string
+  formula: string
+  unit: string
+  direction: KPIDirection
+  source: string
+  frequency: string
+  baseline: number | null
+  target: number | null
+  trajectory: number | null
+  actual: number | null
+  forecast: number | null
+  responsible: string
+  deviationAction: string
+  dataQuality: 'CERTIFIED' | 'REVIEW' | 'MISSING'
+  risk: string
+}
+
+export interface Initiative {
+  id: string
+  name: string
+  description: string
+  objectiveId: StrategicObjective['id']
+  kpiId: KPI['id'] | null
+  owner: string
+  startDate: string
+  endDate: string
+  budget: number
+  expectedBenefit: number
+  risk: string
+  status: InitiativeStatus
+  progress: number
+  dependencies: Initiative['id'][]
+}
+
+export interface FinancialInputs {
+  sales: number
+  ebit: number
+  taxRate: number
+  wacc: number
+  investedCapital: number
+  otif: number
+  wape: number
+  oee: number
+}
+
+export interface FinancialOutputs {
+  nopat: number
+  roic: number
+  eva: number
+}
+
+export interface SimulationRun {
+  id: string
+  period: string
+  scenario: ScenarioKind
+  inputs: FinancialInputs
+  outputs: FinancialOutputs
+  createdAt: string
+}
+
+export interface ControlWorkspace {
+  id: string
+  organizationId: Organization['id']
+  planId: StrategicPlan['id']
+  objectives: StrategicObjective[]
+  relationships: ObjectiveRelationship[]
+  kpis: KPI[]
+  initiatives: Initiative[]
+  scheduleApproved: boolean
+  simulations: SimulationRun[]
+  createdAt: string
+  updatedAt: string
+}
+
 export type OrganizationInput = Omit<Organization, 'id' | 'createdAt' | 'updatedAt'>
 export type StrategicPlanInput = Omit<StrategicPlan, 'id' | 'createdAt' | 'updatedAt'>
 export type StrategicPlanningInput = Omit<StrategicPlanning, 'id' | 'createdAt' | 'updatedAt'>
+export type ControlWorkspaceInput = Omit<ControlWorkspace, 'id' | 'createdAt' | 'updatedAt'>

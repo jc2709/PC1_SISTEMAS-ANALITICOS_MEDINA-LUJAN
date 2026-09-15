@@ -8,12 +8,17 @@ import { AIPage } from './pages/AIPage'
 import { OrganizationsPage } from './pages/OrganizationsPage'
 import { PlanningHubPage } from './pages/PlanningHubPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { BSCPage } from './pages/BSCPage'
+import { InitiativesPage } from './pages/InitiativesPage'
+import { SimulationPage } from './pages/SimulationPage'
+import { ExecutiveDashboardPage } from './pages/ExecutiveDashboardPage'
 
 export type NavigationItem =
   | 'Inicio'
   | 'Organización'
   | 'Planeamiento'
   | 'Balanced Scorecard'
+  | 'Iniciativas'
   | 'Simulación'
   | 'Dashboard'
   | 'IA'
@@ -40,16 +45,24 @@ function App() {
         <PlanningHubPage aiInteractions={workspace.aiInteractions} isLoading={workspace.isLoading} mode={workspace.mode} onDeletePlan={workspace.deletePlan} onRequestOrganization={() => void setLastSection('Organización')} onSavePlan={workspace.savePlan} onSavePlanning={workspace.saveStrategicPlanning} organizations={workspace.organizations} plans={workspace.plans} strategicPlannings={workspace.strategicPlannings} warning={workspace.warning} />
       ) : activeItem === 'IA' ? (
         <AIPage apiBaseUrl={preferences.aiApiBaseUrl} connection={ai.connection} interactions={workspace.aiInteractions} onAnalyze={ai.analyze} onConfigure={() => void setLastSection('Configuración')} onRefresh={ai.refresh} onSaveInteraction={workspace.saveAIInteraction} organizations={workspace.organizations} plans={workspace.plans} />
+      ) : activeItem === 'Balanced Scorecard' ? (
+        <BSCPage controlWorkspaces={workspace.controlWorkspaces} onSave={workspace.saveControlWorkspace} organizations={workspace.organizations} plans={workspace.plans} />
+      ) : activeItem === 'Iniciativas' ? (
+        <InitiativesPage controlWorkspaces={workspace.controlWorkspaces} onSave={workspace.saveControlWorkspace} organizations={workspace.organizations} plans={workspace.plans} />
+      ) : activeItem === 'Simulación' ? (
+        <SimulationPage controlWorkspaces={workspace.controlWorkspaces} onSave={workspace.saveControlWorkspace} organizations={workspace.organizations} plans={workspace.plans} />
+      ) : activeItem === 'Dashboard' ? (
+        <ExecutiveDashboardPage controlWorkspaces={workspace.controlWorkspaces} organizations={workspace.organizations} plans={workspace.plans} />
       ) : activeItem === 'Configuración' ? (
         <SettingsPage aiApiBaseUrl={preferences.aiApiBaseUrl} compactSidebar={preferences.compactSidebar} onAiApiBaseUrlChange={setAiApiBaseUrl} onCompactSidebarChange={setCompactSidebar} storageMode={mode} />
       ) : (
-        <HomePage aiStatus={ai.connection.status} organizationCount={workspace.organizations.length} planCount={workspace.plans.filter((plan) => plan.status === 'ACTIVE').length} selectedSection={activeItem} storageMode={mode} />
+        <HomePage aiStatus={ai.connection.status} initiativeCount={workspace.controlWorkspaces.reduce((total, item) => total + item.initiatives.length, 0)} kpiCount={workspace.controlWorkspaces.reduce((total, item) => total + item.kpis.length, 0)} objectiveCount={workspace.controlWorkspaces.reduce((total, item) => total + item.objectives.length, 0)} organizationCount={workspace.organizations.length} planCount={workspace.plans.filter((plan) => plan.status === 'ACTIVE').length} selectedSection={activeItem} storageMode={mode} />
       )}
     </AppShell>
   )
 }
 
-const navigationItems: NavigationItem[] = ['Inicio', 'Organización', 'Planeamiento', 'Balanced Scorecard', 'Simulación', 'Dashboard', 'IA', 'Configuración']
+const navigationItems: NavigationItem[] = ['Inicio', 'Organización', 'Planeamiento', 'Balanced Scorecard', 'Iniciativas', 'Simulación', 'Dashboard', 'IA', 'Configuración']
 
 function isNavigationItem(value: string): value is NavigationItem {
   return navigationItems.includes(value as NavigationItem)

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { buildOrganization, buildPlan } from '../services/workspaceService'
 import { buildStrategicPlanning, validateStrategicPlanning } from '../services/planningService'
+import { buildControlWorkspace } from '../services/controlService'
 import { createStorageProvider } from '../storage/createStorageProvider'
 import { InMemoryStorageProvider } from '../storage/InMemoryStorageProvider'
 import type { StorageMode, StorageProvider } from '../storage/StorageProvider'
-import type { AIInteraction, Organization, OrganizationInput, StrategicPlan, StrategicPlanInput, StrategicPlanning, StrategicPlanningInput } from '../types/models'
+import type { AIInteraction, ControlWorkspace, ControlWorkspaceInput, Organization, OrganizationInput, StrategicPlan, StrategicPlanInput, StrategicPlanning, StrategicPlanningInput } from '../types/models'
 
 interface WorkspaceState {
   isLoading: boolean
@@ -13,6 +14,7 @@ interface WorkspaceState {
   plans: StrategicPlan[]
   aiInteractions: AIInteraction[]
   strategicPlannings: StrategicPlanning[]
+  controlWorkspaces: ControlWorkspace[]
   warning: string | null
 }
 
@@ -25,6 +27,7 @@ export function useStrategicWorkspace() {
     plans: [],
     aiInteractions: [],
     strategicPlannings: [],
+    controlWorkspaces: [],
     warning: null,
   })
 
@@ -41,11 +44,12 @@ export function useStrategicWorkspace() {
       }
 
       providerRef.current = provider
-      const [organizations, plans, aiInteractions, strategicPlannings] = await Promise.all([
+      const [organizations, plans, aiInteractions, strategicPlannings, controlWorkspaces] = await Promise.all([
         provider.getOrganizations(),
         provider.getPlans(),
         provider.getAIInteractions(),
         provider.getStrategicPlannings(),
+        provider.getControlWorkspaces(),
       ])
       if (!isActive) return
       setState({
@@ -55,6 +59,7 @@ export function useStrategicWorkspace() {
         plans,
         aiInteractions,
         strategicPlannings,
+        controlWorkspaces,
         warning: provider.mode === 'memory' ? 'Las organizaciones, planes y su contenido estratégico se conservarán solo durante esta sesión.' : null,
       })
     }
@@ -86,6 +91,7 @@ export function useStrategicWorkspace() {
       plans: current.plans.filter((plan) => plan.organizationId !== id),
       aiInteractions: current.aiInteractions.filter((interaction) => interaction.organizationId !== id),
       strategicPlannings: current.strategicPlannings.filter((planning) => planning.organizationId !== id),
+      controlWorkspaces: current.controlWorkspaces.filter((workspace) => workspace.organizationId !== id),
     }))
   }, [])
 
@@ -108,6 +114,7 @@ export function useStrategicWorkspace() {
       plans: current.plans.filter((plan) => plan.id !== id),
       aiInteractions: current.aiInteractions.filter((interaction) => interaction.planId !== id),
       strategicPlannings: current.strategicPlannings.filter((planning) => planning.planId !== id),
+      controlWorkspaces: current.controlWorkspaces.filter((workspace) => workspace.planId !== id),
     }))
   }, [])
 
@@ -136,5 +143,17 @@ export function useStrategicWorkspace() {
     return planning
   }, [])
 
-  return { ...state, deleteOrganization, deletePlan, saveAIInteraction, saveOrganization, savePlan, saveStrategicPlanning }
+  const saveControlWorkspace = useCallback(async (input: ControlWorkspaceInput, existing?: ControlWorkspace) => {
+    const workspace = buildControlWorkspace(input, existing)
+    await providerRef.current?.saveControlWorkspace(workspace)
+    setState((current) => ({
+      ...current,
+      controlWorkspaces: current.controlWorkspaces.some((item) => item.id === workspace.id)
+        ? current.controlWorkspaces.map((item) => item.id === workspace.id ? workspace : item)
+        : [...current.controlWorkspaces, workspace],
+    }))
+    return workspace
+  }, [])
+
+  return { ...state, deleteOrganization, deletePlan, saveAIInteraction, saveControlWorkspace, saveOrganization, savePlan, saveStrategicPlanning }
 }

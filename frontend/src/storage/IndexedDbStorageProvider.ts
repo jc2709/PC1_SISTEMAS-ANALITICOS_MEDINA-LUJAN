@@ -1,13 +1,14 @@
-import type { AIInteraction, AppPreferences, Organization, StrategicPlan, StrategicPlanning } from '../types/models'
+import type { AIInteraction, AppPreferences, ControlWorkspace, Organization, StrategicPlan, StrategicPlanning } from '../types/models'
 import type { StorageProvider } from './StorageProvider'
 
 const DATABASE_NAME = 'gestion-control-estrategico-ia'
-const DATABASE_VERSION = 4
+const DATABASE_VERSION = 5
 const SETTINGS_STORE = 'settings'
 const ORGANIZATIONS_STORE = 'organizations'
 const PLANS_STORE = 'plans'
 const AI_INTERACTIONS_STORE = 'aiInteractions'
 const STRATEGIC_PLANNINGS_STORE = 'strategicPlannings'
+const CONTROL_WORKSPACES_STORE = 'controlWorkspaces'
 const PREFERENCES_KEY = 'app-preferences'
 
 function requestToPromise<T>(request: IDBRequest<T>) {
@@ -55,6 +56,11 @@ export class IndexedDbStorageProvider implements StorageProvider {
         planningStore.createIndex('organizationId', 'organizationId', { unique: false })
         planningStore.createIndex('planId', 'planId', { unique: true })
       }
+      if (!database.objectStoreNames.contains(CONTROL_WORKSPACES_STORE)) {
+        const controlStore = database.createObjectStore(CONTROL_WORKSPACES_STORE, { keyPath: 'id' })
+        controlStore.createIndex('organizationId', 'organizationId', { unique: false })
+        controlStore.createIndex('planId', 'planId', { unique: true })
+      }
     })
 
     this.database = await requestToPromise(request)
@@ -83,7 +89,7 @@ export class IndexedDbStorageProvider implements StorageProvider {
   }
 
   async deleteOrganization(id: Organization['id']) {
-    const transaction = this.getTransaction([ORGANIZATIONS_STORE, PLANS_STORE, AI_INTERACTIONS_STORE, STRATEGIC_PLANNINGS_STORE], 'readwrite')
+    const transaction = this.getTransaction([ORGANIZATIONS_STORE, PLANS_STORE, AI_INTERACTIONS_STORE, STRATEGIC_PLANNINGS_STORE, CONTROL_WORKSPACES_STORE], 'readwrite')
     transaction.objectStore(ORGANIZATIONS_STORE).delete(id)
 
     const plansIndex = transaction.objectStore(PLANS_STORE).index('organizationId')
@@ -96,6 +102,7 @@ export class IndexedDbStorageProvider implements StorageProvider {
     })
     this.deleteByIndex(transaction.objectStore(AI_INTERACTIONS_STORE).index('organizationId'), id)
     this.deleteByIndex(transaction.objectStore(STRATEGIC_PLANNINGS_STORE).index('organizationId'), id)
+    this.deleteByIndex(transaction.objectStore(CONTROL_WORKSPACES_STORE).index('organizationId'), id)
     await transactionToPromise(transaction)
   }
 
@@ -110,10 +117,11 @@ export class IndexedDbStorageProvider implements StorageProvider {
   }
 
   async deletePlan(id: StrategicPlan['id']) {
-    const transaction = this.getTransaction([PLANS_STORE, AI_INTERACTIONS_STORE, STRATEGIC_PLANNINGS_STORE], 'readwrite')
+    const transaction = this.getTransaction([PLANS_STORE, AI_INTERACTIONS_STORE, STRATEGIC_PLANNINGS_STORE, CONTROL_WORKSPACES_STORE], 'readwrite')
     transaction.objectStore(PLANS_STORE).delete(id)
     this.deleteByIndex(transaction.objectStore(AI_INTERACTIONS_STORE).index('planId'), id)
     this.deleteByIndex(transaction.objectStore(STRATEGIC_PLANNINGS_STORE).index('planId'), id)
+    this.deleteByIndex(transaction.objectStore(CONTROL_WORKSPACES_STORE).index('planId'), id)
     await transactionToPromise(transaction)
   }
 
@@ -134,6 +142,16 @@ export class IndexedDbStorageProvider implements StorageProvider {
   async saveStrategicPlanning(planning: StrategicPlanning) {
     const transaction = this.getTransaction(STRATEGIC_PLANNINGS_STORE, 'readwrite')
     transaction.objectStore(STRATEGIC_PLANNINGS_STORE).put(planning)
+    await transactionToPromise(transaction)
+  }
+
+  async getControlWorkspaces() {
+    return requestToPromise(this.getStore(CONTROL_WORKSPACES_STORE, 'readonly').getAll()) as Promise<ControlWorkspace[]>
+  }
+
+  async saveControlWorkspace(workspace: ControlWorkspace) {
+    const transaction = this.getTransaction(CONTROL_WORKSPACES_STORE, 'readwrite')
+    transaction.objectStore(CONTROL_WORKSPACES_STORE).put(workspace)
     await transactionToPromise(transaction)
   }
 

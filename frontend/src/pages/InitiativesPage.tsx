@@ -1,0 +1,93 @@
+import { CalendarDays, CheckCircle2, Pencil, Plus, ShieldCheck, Trash2 } from 'lucide-react'
+import { useState, type FormEvent } from 'react'
+import { Modal } from '../components/Modal'
+import { PlanContextSelector } from '../components/PlanContextSelector'
+import { createEmptyControlWorkspace, createInitiative, isInitiativeDelayed, toControlWorkspaceInput } from '../services/controlService'
+import type { ControlWorkspace, ControlWorkspaceInput, Initiative, InitiativeStatus, KPI, Organization, StrategicObjective, StrategicPlan } from '../types/models'
+
+interface InitiativesPageProps {
+  controlWorkspaces: ControlWorkspace[]
+  onSave: (input: ControlWorkspaceInput, existing?: ControlWorkspace) => Promise<ControlWorkspace>
+  organizations: Organization[]
+  plans: StrategicPlan[]
+}
+
+const STATUS_LABELS: Record<InitiativeStatus, string> = { PLANNED: 'Planificada', IN_PROGRESS: 'En ejecución', BLOCKED: 'Bloqueada', COMPLETED: 'Completada', CANCELLED: 'Cancelada' }
+const STATUS_STYLES: Record<InitiativeStatus, string> = { PLANNED: 'bg-blue-50 text-blue-700', IN_PROGRESS: 'bg-amber-50 text-amber-700', BLOCKED: 'bg-red-50 text-red-700', COMPLETED: 'bg-emerald-50 text-emerald-700', CANCELLED: 'bg-slate-100 text-slate-500' }
+
+export function InitiativesPage({ controlWorkspaces, onSave, organizations, plans }: InitiativesPageProps) {
+  const [selectedPlanId, setSelectedPlanId] = useState('')
+  const [draft, setDraft] = useState<Initiative | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const effectivePlanId = plans.some((plan) => plan.id === selectedPlanId) ? selectedPlanId : plans[0]?.id ?? ''
+  const plan = plans.find((item) => item.id === effectivePlanId)
+  const workspace = controlWorkspaces.find((item) => item.planId === effectivePlanId)
+  const input = workspace ? toControlWorkspaceInput(workspace) : createEmptyControlWorkspace(plan?.organizationId ?? '', effectivePlanId)
+
+  const persist = async (next: ControlWorkspaceInput, message: string) => {
+    try { await onSave(next, workspace); setNotice(message); setError(null) }
+    catch (caughtError) { setError(caughtError instanceof Error ? caughtError.message : 'No se pudieron guardar las iniciativas.') }
+  }
+
+  const saveInitiative = async (initiative: Initiative) => {
+    const exists = input.initiatives.some((item) => item.id === initiative.id)
+    await persist({ ...input, scheduleApproved: false, initiatives: exists ? input.initiatives.map((item) => item.id === initiative.id ? initiative : item) : [...input.initiatives, initiative] }, exists ? 'Iniciativa actualizada; el cronograma requiere nueva aprobación.' : 'Iniciativa creada.')
+    setDraft(null)
+  }
+
+  const removeInitiative = (initiative: Initiative) => {
+    if (!window.confirm(`¿Eliminar la iniciativa “${initiative.name}”?`)) return
+    const initiatives = input.initiatives.filter((item) => item.id !== initiative.id).map((item) => ({ ...item, dependencies: item.dependencies.filter((id) => id !== initiative.id) }))
+    void persist({ ...input, initiatives, scheduleApproved: false }, 'Iniciativa eliminada.')
+  }
+
+  const delayedCount = input.initiatives.filter((item) => isInitiativeDelayed(item)).length
+  return (
+    <div className="mx-auto max-w-[1500px]">
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">Fase 7 · Ejecución</p><h1 className="mt-3 text-3xl font-bold tracking-[-0.035em] text-slate-950">Iniciativas y Gantt</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Conecta acciones, responsables, presupuesto, dependencias y avance con objetivos y KPI.</p></div><div className="w-full xl:w-auto"><PlanContextSelector onChange={setSelectedPlanId} organizations={organizations} plans={plans} selectedPlanId={effectivePlanId} /></div></div>
+      {notice ? <p className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800" role="status">{notice}</p> : null}
+      {error ? <p className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{error}</p> : null}
+      {plan ? <>
+        <div className="mt-7 grid gap-4 sm:grid-cols-4"><Summary label="Total" value={input.initiatives.length} /><Summary label="En ejecución" value={input.initiatives.filter((item) => item.status === 'IN_PROGRESS').length} /><Summary label="Completadas" value={input.initiatives.filter((item) => item.status === 'COMPLETED').length} /><Summary label="Retrasadas" value={delayedCount} danger={delayedCount > 0} /></div>
+        <section className="mt-7 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_8px_28px_rgba(15,23,42,0.05)] sm:p-7">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-xl font-bold text-slate-950">Portafolio de iniciativas</h2><p className="mt-1 text-sm text-slate-500">Los cambios de fechas invalidan la aprobación previa del cronograma.</p></div><button className="inline-flex items-center gap-2 rounded-xl bg-navy-900 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50" disabled={input.objectives.length === 0} onClick={() => setDraft(createInitiative(input.objectives[0]?.id))} type="button"><Plus className="size-4" aria-hidden="true" />Nueva iniciativa</button></div>
+          {input.objectives.length === 0 ? <p className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">Crea al menos un objetivo en Balanced Scorecard antes de registrar iniciativas.</p> : null}
+          <div className="mt-5 overflow-x-auto"><table className="w-full min-w-[1000px] text-left"><thead className="bg-slate-50 text-xs font-bold uppercase tracking-[0.1em] text-slate-400"><tr><th className="px-4 py-3">Iniciativa</th><th className="px-4 py-3">Responsable</th><th className="px-4 py-3">Fechas</th><th className="px-4 py-3">Presupuesto / beneficio</th><th className="px-4 py-3">Avance</th><th className="px-4 py-3">Estado</th><th className="px-4 py-3 text-right">Acciones</th></tr></thead><tbody className="divide-y divide-slate-100">{input.initiatives.map((initiative) => <tr key={initiative.id}><td className="px-4 py-4"><p className="font-bold text-slate-800">{initiative.name}</p><p className="mt-1 text-xs text-slate-400">{input.objectives.find((item) => item.id === initiative.objectiveId)?.name ?? 'Sin objetivo'} · {initiative.dependencies.length} dependencias</p></td><td className="px-4 py-4 text-sm text-slate-600">{initiative.owner || 'Sin asignar'}</td><td className="px-4 py-4 text-sm font-medium text-slate-600">{formatDate(initiative.startDate)} – {formatDate(initiative.endDate)}{isInitiativeDelayed(initiative) ? <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-[10px] font-bold text-red-600">Retrasada</span> : null}</td><td className="px-4 py-4 text-sm text-slate-600"><p>S/ {formatMoney(initiative.budget)}</p><p className="mt-1 text-xs text-emerald-700">Beneficio S/ {formatMoney(initiative.expectedBenefit)}</p></td><td className="px-4 py-4"><div className="h-2 w-28 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-cyan-600" style={{ width: `${initiative.progress}%` }} /></div><p className="mt-1 text-xs font-bold text-slate-500">{initiative.progress}%</p></td><td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_STYLES[initiative.status]}`}>{STATUS_LABELS[initiative.status]}</span></td><td className="px-4 py-4"><div className="flex justify-end gap-1"><button aria-label={`Editar ${initiative.name}`} className="grid size-9 place-items-center rounded-lg text-slate-400 hover:bg-cyan-50 hover:text-cyan-700" onClick={() => setDraft(structuredClone(initiative))} type="button"><Pencil className="size-4" aria-hidden="true" /></button><button aria-label={`Eliminar ${initiative.name}`} className="grid size-9 place-items-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600" onClick={() => removeInitiative(initiative)} type="button"><Trash2 className="size-4" aria-hidden="true" /></button></div></td></tr>)}</tbody></table>{input.initiatives.length === 0 ? <p className="py-10 text-center text-sm text-slate-400">Aún no hay iniciativas para este plan.</p> : null}</div>
+        </section>
+
+        <section className="mt-7 rounded-3xl border border-slate-200 bg-white p-5 sm:p-7">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-start gap-3"><span className="grid size-11 place-items-center rounded-xl bg-cyan-soft text-cyan-700"><CalendarDays className="size-5" aria-hidden="true" /></span><div><h2 className="text-xl font-bold text-slate-950">Cronograma Gantt</h2><p className="mt-1 text-sm text-slate-500">{input.scheduleApproved ? 'Cronograma aprobado.' : 'Cronograma pendiente de aprobación.'}</p></div></div><button className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold ${input.scheduleApproved ? 'bg-emerald-50 text-emerald-700' : 'bg-cyan-700 text-white'}`} disabled={input.initiatives.length === 0} onClick={() => void persist({ ...input, scheduleApproved: !input.scheduleApproved }, input.scheduleApproved ? 'Aprobación retirada.' : 'Cronograma aprobado.')} type="button"><ShieldCheck className="size-4" aria-hidden="true" />{input.scheduleApproved ? 'Aprobado' : 'Aprobar cronograma'}</button></div>
+          <Gantt initiatives={input.initiatives} />
+        </section>
+      </> : null}
+      {draft ? <InitiativeModal draft={draft} initiatives={input.initiatives} kpis={input.kpis} objectives={input.objectives} onClose={() => setDraft(null)} onSave={saveInitiative} /> : null}
+    </div>
+  )
+}
+
+function InitiativeModal({ draft: initialDraft, initiatives, kpis, objectives, onClose, onSave }: { draft: Initiative; initiatives: Initiative[]; kpis: KPI[]; objectives: StrategicObjective[]; onClose: () => void; onSave: (initiative: Initiative) => Promise<void> }) {
+  const [draft, setDraft] = useState(initialDraft)
+  const availableKpis = kpis.filter((kpi) => kpi.objectiveId === draft.objectiveId)
+  const handleSubmit = (event: FormEvent) => { event.preventDefault(); if (draft.name.trim() && draft.objectiveId) void onSave({ ...draft, name: draft.name.trim(), progress: Math.max(0, Math.min(100, draft.progress)) }) }
+  return <Modal description="Las fechas y dependencias alimentan automáticamente el Gantt." isOpen onClose={onClose} title={initialDraft.name ? 'Editar iniciativa' : 'Nueva iniciativa'} width="large"><form onSubmit={handleSubmit}><div className="grid max-h-[65vh] gap-4 overflow-y-auto p-6 sm:grid-cols-2 lg:grid-cols-3"><Field label="Nombre" onChange={(value) => setDraft((current) => ({ ...current, name: value }))} required value={draft.name} /><SelectField label="Objetivo" onChange={(value) => setDraft((current) => ({ ...current, objectiveId: value, kpiId: null }))} options={objectives.map((item) => [item.id, item.name])} value={draft.objectiveId} /><SelectField label="KPI relacionado" onChange={(value) => setDraft((current) => ({ ...current, kpiId: value || null }))} options={[["", "Sin KPI"], ...availableKpis.map((item) => [item.id, item.name] as [string, string])]} value={draft.kpiId ?? ''} /><div className="sm:col-span-2 lg:col-span-3"><TextArea label="Descripción" onChange={(value) => setDraft((current) => ({ ...current, description: value }))} value={draft.description} /></div><Field label="Responsable" onChange={(value) => setDraft((current) => ({ ...current, owner: value }))} value={draft.owner} /><DateField label="Fecha inicio" onChange={(value) => setDraft((current) => ({ ...current, startDate: value }))} value={draft.startDate} /><DateField label="Fecha fin" onChange={(value) => setDraft((current) => ({ ...current, endDate: value }))} value={draft.endDate} /><NumberField label="Presupuesto" onChange={(value) => setDraft((current) => ({ ...current, budget: Number(value) }))} value={draft.budget} /><NumberField label="Beneficio esperado" onChange={(value) => setDraft((current) => ({ ...current, expectedBenefit: Number(value) }))} value={draft.expectedBenefit} /><SelectField label="Estado" onChange={(value) => setDraft((current) => ({ ...current, status: value as InitiativeStatus }))} options={Object.entries(STATUS_LABELS)} value={draft.status} /><label className="text-sm font-bold text-slate-700">Avance ({draft.progress}%)<input className="mt-4 w-full accent-cyan-600" max="100" min="0" onChange={(event) => setDraft((current) => ({ ...current, progress: Number(event.target.value) }))} type="range" value={draft.progress} /></label><div className="sm:col-span-2"><TextArea label="Riesgo" onChange={(value) => setDraft((current) => ({ ...current, risk: value }))} value={draft.risk} /></div><fieldset className="sm:col-span-2 lg:col-span-3"><legend className="text-sm font-bold text-slate-700">Dependencias</legend><div className="mt-2 grid gap-2 sm:grid-cols-2">{initiatives.filter((item) => item.id !== draft.id).map((item) => <label className="flex items-center gap-2 rounded-xl border border-slate-200 p-3 text-sm text-slate-600" key={item.id}><input checked={draft.dependencies.includes(item.id)} className="accent-cyan-600" onChange={(event) => setDraft((current) => ({ ...current, dependencies: event.target.checked ? [...current.dependencies, item.id] : current.dependencies.filter((id) => id !== item.id) }))} type="checkbox" />{item.name}</label>)}{initiatives.filter((item) => item.id !== draft.id).length === 0 ? <p className="text-xs text-slate-400">No hay otras iniciativas disponibles.</p> : null}</div></fieldset></div><div className="flex justify-end gap-2 border-t border-slate-200 px-6 py-4"><button className="rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500" onClick={onClose} type="button">Cancelar</button><button className="inline-flex items-center gap-2 rounded-xl bg-navy-900 px-4 py-2.5 text-sm font-bold text-white" type="submit"><CheckCircle2 className="size-4" aria-hidden="true" />Guardar</button></div></form></Modal>
+}
+
+function Gantt({ initiatives }: { initiatives: Initiative[] }) {
+  if (initiatives.length === 0) return <p className="mt-6 rounded-2xl border border-dashed border-slate-300 py-10 text-center text-sm text-slate-400">El Gantt aparecerá cuando registres iniciativas.</p>
+  const timestamps = initiatives.flatMap((item) => [new Date(item.startDate).getTime(), new Date(item.endDate).getTime()]).filter(Number.isFinite)
+  const min = Math.min(...timestamps)
+  const max = Math.max(...timestamps)
+  const span = Math.max(86_400_000, max - min)
+  return <div className="mt-6 overflow-x-auto"><div className="min-w-[760px]"><div className="ml-52 flex justify-between border-b border-slate-200 pb-2 text-xs font-bold text-slate-400"><span>{formatDate(new Date(min).toISOString().slice(0, 10))}</span><span>{formatDate(new Date(max).toISOString().slice(0, 10))}</span></div><div className="mt-2 space-y-2">{initiatives.map((initiative) => { const start = new Date(initiative.startDate).getTime(); const end = new Date(initiative.endDate).getTime(); const left = ((start - min) / span) * 100; const width = Math.max(2, ((end - start) / span) * 100); return <div className="flex items-center" key={initiative.id}><p className="w-52 shrink-0 truncate pr-4 text-sm font-semibold text-slate-600">{initiative.name}</p><div className="relative h-9 flex-1 rounded-lg bg-slate-50"><div className={`absolute top-1.5 h-6 rounded-md ${isInitiativeDelayed(initiative) ? 'bg-red-400' : initiative.status === 'COMPLETED' ? 'bg-emerald-500' : 'bg-cyan-600'}`} style={{ left: `${left}%`, width: `${Math.min(width, 100 - left)}%` }}><span className="absolute inset-0 flex items-center justify-center truncate px-2 text-[10px] font-bold text-white">{initiative.progress}%</span></div></div></div> })}</div></div></div>
+}
+
+const fieldClass = 'mt-2 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100'
+function Field({ label, onChange, required, value }: { label: string; onChange: (value: string) => void; required?: boolean; value: string }) { return <label className="text-sm font-bold text-slate-700">{label}{required ? ' *' : ''}<input className={fieldClass} onChange={(event) => onChange(event.target.value)} required={required} value={value} /></label> }
+function DateField({ label, onChange, value }: { label: string; onChange: (value: string) => void; value: string }) { return <label className="text-sm font-bold text-slate-700">{label}<input className={fieldClass} onChange={(event) => onChange(event.target.value)} required type="date" value={value} /></label> }
+function NumberField({ label, onChange, value }: { label: string; onChange: (value: string) => void; value: number }) { return <label className="text-sm font-bold text-slate-700">{label}<input className={fieldClass} min="0" onChange={(event) => onChange(event.target.value)} step="any" type="number" value={value} /></label> }
+function TextArea({ label, onChange, value }: { label: string; onChange: (value: string) => void; value: string }) { return <label className="text-sm font-bold text-slate-700">{label}<textarea className={fieldClass} onChange={(event) => onChange(event.target.value)} rows={3} value={value} /></label> }
+function SelectField({ label, onChange, options, value }: { label: string; onChange: (value: string) => void; options: Array<readonly [string, string]>; value: string }) { return <label className="text-sm font-bold text-slate-700">{label}<select className={fieldClass} onChange={(event) => onChange(event.target.value)} value={value}>{options.map(([optionValue, text]) => <option key={optionValue} value={optionValue}>{text}</option>)}</select></label> }
+function Summary({ danger, label, value }: { danger?: boolean; label: string; value: number }) { return <div className={`rounded-2xl border bg-white px-5 py-4 ${danger ? 'border-red-200' : 'border-slate-200'}`}><p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p><p className={`mt-2 text-2xl font-bold ${danger ? 'text-red-600' : 'text-slate-950'}`}>{value}</p></div> }
+function formatMoney(value: number) { return new Intl.NumberFormat('es-PE', { maximumFractionDigits: 0 }).format(value) }
+function formatDate(value: string) { const date = new Date(`${value}T00:00:00`); return Number.isFinite(date.getTime()) ? new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }).format(date) : 'Sin fecha' }

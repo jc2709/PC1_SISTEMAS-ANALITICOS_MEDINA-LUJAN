@@ -1,4 +1,4 @@
-import { BarChart3, Bot, Building2, Gauge, LayoutDashboard, Settings, SlidersHorizontal, Target, X, type LucideIcon } from 'lucide-react'
+import { BarChart3, Bot, Building2, Flag, Gauge, LayoutDashboard, Settings, SlidersHorizontal, Target, X, type LucideIcon } from 'lucide-react'
 import type { NavigationItem } from '../App'
 import type { AIAvailability } from '../services/aiService'
 import { AIStatusBadge } from './AIStatusBadge'
@@ -18,6 +18,7 @@ const navigation: Array<{ label: NavigationItem; icon: LucideIcon }> = [
   { label: 'Organización', icon: Building2 },
   { label: 'Planeamiento', icon: Target },
   { label: 'Balanced Scorecard', icon: BarChart3 },
+  { label: 'Iniciativas', icon: Flag },
   { label: 'Simulación', icon: SlidersHorizontal },
   { label: 'Dashboard', icon: Gauge },
   { label: 'IA', icon: Bot },
@@ -33,7 +34,7 @@ export function Sidebar({ activeItem, aiStatus, compact, isOpen, onClose, onNavi
   return (
     <>
       <button aria-label="Cerrar menú" className={`fixed inset-0 z-30 bg-navy-950/55 backdrop-blur-sm transition-opacity lg:hidden ${isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`} onClick={onClose} type="button" />
-      <aside aria-label="Navegación principal" className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col bg-navy-950 px-5 py-6 text-white shadow-2xl transition-[transform,width] duration-300 lg:translate-x-0 ${compact ? 'lg:w-20 lg:px-3' : 'lg:w-72'} ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside aria-label="Navegación principal" className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col overflow-y-auto bg-navy-950 px-5 py-6 text-white shadow-2xl transition-[transform,width] duration-300 lg:translate-x-0 ${compact ? 'lg:w-20 lg:px-3' : 'lg:w-72'} ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between">
           <BrandMark compact={compact} />
           <button aria-label="Cerrar menú" className="rounded-lg p-2 text-slate-400 transition hover:bg-white/10 hover:text-white lg:hidden" onClick={onClose} type="button"><X className="size-5" aria-hidden="true" /></button>

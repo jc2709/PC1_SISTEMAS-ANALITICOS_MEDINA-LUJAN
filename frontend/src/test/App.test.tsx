@@ -13,7 +13,8 @@ describe('App', () => {
     expect(screen.getByText('Organizaciones')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Simulación' }))
-    expect(screen.getByRole('status')).toHaveTextContent('Simulación está planificada para una fase posterior')
+    expect(screen.getByRole('heading', { name: 'Simulación multiperiodo y multiescenario' })).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Crea primero un plan estratégico')
 
     fireEvent.click(screen.getByRole('button', { name: 'IA' }))
     expect(screen.getByRole('heading', { name: 'Copiloto IA' })).toBeInTheDocument()
@@ -99,4 +100,60 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Guardar planeamiento' }))
     expect(await screen.findByText('Planeamiento guardado correctamente en este dispositivo.')).toBeInTheDocument()
   })
+
+  it('conecta objetivo, KPI, iniciativa, simulación y dashboard', async () => {
+    render(<App />)
+    await createOrganizationAndPlan()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Balanced Scorecard' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Objetivo' }))
+    fireEvent.change(screen.getByLabelText('Nombre *'), { target: { value: 'Crecer rentablemente' } })
+    fireEvent.change(screen.getByLabelText('Responsable'), { target: { value: 'Gerencia general' } })
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form')!)
+    expect(await screen.findByText('Objetivo creado.')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'KPI' }))
+    fireEvent.change(screen.getByLabelText('Nombre *'), { target: { value: 'ROIC' } })
+    fireEvent.change(screen.getByLabelText('Unidad'), { target: { value: '%' } })
+    fireEvent.change(screen.getByLabelText('Meta'), { target: { value: '14' } })
+    fireEvent.change(screen.getByLabelText('Real'), { target: { value: '13' } })
+    fireEvent.change(screen.getByLabelText('Trayectoria'), { target: { value: '12.5' } })
+    fireEvent.change(screen.getByLabelText('Forecast'), { target: { value: '14.2' } })
+    fireEvent.change(screen.getByLabelText('Calidad'), { target: { value: 'CERTIFIED' } })
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form')!)
+    expect(await screen.findByText('KPI creado.')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciativas' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Nueva iniciativa' }))
+    fireEvent.change(screen.getByLabelText('Nombre *'), { target: { value: 'Optimizar capital de trabajo' } })
+    fireEvent.change(screen.getByLabelText('Estado'), { target: { value: 'IN_PROGRESS' } })
+    fireEvent.submit(screen.getByRole('dialog').querySelector('form')!)
+    expect(await screen.findByText('Iniciativa creada.')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Simulación' }))
+    fireEvent.click(await screen.findByRole('button', { name: /Expansión/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar simulación' }))
+    expect(await screen.findByText(/Escenario Expansión guardado/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
+    expect(await screen.findByRole('heading', { name: 'Dashboard ejecutivo' })).toBeInTheDocument()
+    expect(screen.getAllByText('ROIC').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Optimizar capital de trabajo')).not.toBeInTheDocument()
+    expect(screen.getByText('KPI certificados')).toBeInTheDocument()
+  })
 })
+
+async function createOrganizationAndPlan() {
+  await screen.findByRole('heading', { name: 'GESTIÓN Y CONTROL ESTRATÉGICO IA' })
+  fireEvent.click(screen.getByRole('button', { name: 'Organización' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Nueva organización' }))
+  fireEvent.change(screen.getByLabelText(/Nombre/), { target: { value: 'AndesPack S.A.C.' } })
+  fireEvent.change(screen.getByLabelText(/Sector/), { target: { value: 'Industria' } })
+  fireEvent.submit(screen.getByRole('dialog').querySelector('form')!)
+  await screen.findByText('Se creó AndesPack S.A.C.')
+  fireEvent.click(screen.getByRole('button', { name: 'Planeamiento' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Nuevo plan' }))
+  fireEvent.change(screen.getByLabelText('Nombre del plan*'), { target: { value: 'Plan Integrado 2027' } })
+  fireEvent.submit(screen.getByRole('dialog').querySelector('form')!)
+  await screen.findByText('Se creó Plan Integrado 2027')
+}

@@ -16,7 +16,7 @@ Construir una aplicación ejecutiva que conecte organizaciones, planes, objetivo
 - **Persistencia local:** abstracción común con IndexedDB; SQLite queda reservado para una fase posterior si el alcance lo requiere.
 - **IA:** API propia desplegable en Vercel que protege la clave de Gemini, valida respuestas estructuradas y mantiene cada propuesta bajo decisión humana.
 
-Hasta la Fase 5 hay frontend, persistencia local, organizaciones, planes, backend seguro para Gemini, control humano de propuestas, bitácora de IA y un flujo completo de formulación estratégica. El frontend y el backend están desplegados en Vercel y la generación real funciona con una cadena de modelos Gemini de contingencia.
+Hasta la Fase 9 existe un flujo integrado desde la formulación hasta el control: organizaciones, planes, diagnóstico asistido, planeamiento, mapa estratégico, KPI, iniciativas, Gantt, simulaciones financieras y dashboard ejecutivo. Todo el contenido funcional se conserva localmente por plan; Gemini sigue operando mediante el backend seguro desplegado en Vercel.
 
 ## Estructura actual
 
@@ -75,10 +75,10 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 | 3 | Organizaciones y planes | Completada |
 | 4 | Integración Gemini y backend Vercel | Completada |
 | 5 | Planeamiento estratégico | Completada |
-| 6 | Balanced Scorecard | Pendiente |
-| 7 | Iniciativas y Gantt | Pendiente |
-| 8 | Simulación multiperiodo/multiescenario | Pendiente |
-| 9 | Dashboard y seguimiento | Pendiente |
+| 6 | Balanced Scorecard | Completada |
+| 7 | Iniciativas y Gantt | Completada |
+| 8 | Simulación multiperiodo/multiescenario | Completada |
+| 9 | Dashboard y seguimiento | Completada |
 | 10 | Copiloto y narrativa IA | Pendiente |
 | 11 | Excel, PPT y reportes | Pendiente |
 | 12 | Pruebas integrales | Pendiente |
@@ -86,9 +86,9 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 
 ## Estado actual
 
-**Fase 5 — Planeamiento estratégico:** cada plan dispone de un espacio de formulación con Preparación, Diagnóstico FODA y hechos críticos, Identidad y Elección estratégica. Cada etapa tiene estado propio y el contenido se conserva en IndexedDB. Un diagnóstico de IA solo se incorpora mediante la acción explícita `Incorporar al plan` después de haber sido aprobado por el usuario.
+**Fases 6–9 — Control estratégico integrado:** el Balanced Scorecard administra objetivos, relaciones causa–efecto y KPI con semáforo; las iniciativas alimentan un Gantt aprobable; el simulador compara escenarios y calcula NOPAT, ROIC y EVA; el dashboard consolida resultados, calidad de datos y estado de ejecución.
 
-Consulte [docs/evidencias/FASE_05.md](docs/evidencias/FASE_05.md) para ver las decisiones y pruebas, y [docs/manual/CONFIGURACION_GEMINI.md](docs/manual/CONFIGURACION_GEMINI.md) para revisar la conexión sin exponer secretos.
+Consulte [docs/evidencias/FASES_06_09.md](docs/evidencias/FASES_06_09.md) para ver las decisiones y pruebas, y [docs/manual/CONFIGURACION_GEMINI.md](docs/manual/CONFIGURACION_GEMINI.md) para revisar la conexión sin exponer secretos.
 
 ## Backend Gemini
 

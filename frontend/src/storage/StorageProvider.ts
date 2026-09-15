@@ -1,4 +1,4 @@
-import type { AIInteraction, AppPreferences, Organization, StrategicPlan, StrategicPlanning } from '../types/models'
+import type { AIInteraction, AppPreferences, ControlWorkspace, Organization, StrategicPlan, StrategicPlanning } from '../types/models'
 
 export type StorageMode = 'indexed-db' | 'memory'
 
@@ -17,4 +17,6 @@ export interface StorageProvider {
   saveAIInteraction(interaction: AIInteraction): Promise<void>
   getStrategicPlannings(): Promise<StrategicPlanning[]>
   saveStrategicPlanning(planning: StrategicPlanning): Promise<void>
+  getControlWorkspaces(): Promise<ControlWorkspace[]>
+  saveControlWorkspace(workspace: ControlWorkspace): Promise<void>
 }

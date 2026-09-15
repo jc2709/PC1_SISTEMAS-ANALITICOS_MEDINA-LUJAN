@@ -1,4 +1,4 @@
-import type { AIInteraction, AppPreferences, Organization, StrategicPlan, StrategicPlanning } from '../types/models'
+import type { AIInteraction, AppPreferences, ControlWorkspace, Organization, StrategicPlan, StrategicPlanning } from '../types/models'
 import type { StorageProvider } from './StorageProvider'
 
 export class InMemoryStorageProvider implements StorageProvider {
@@ -8,6 +8,7 @@ export class InMemoryStorageProvider implements StorageProvider {
   private plans = new Map<string, StrategicPlan>()
   private aiInteractions = new Map<string, AIInteraction>()
   private strategicPlannings = new Map<string, StrategicPlanning>()
+  private controlWorkspaces = new Map<string, ControlWorkspace>()
 
   async initialize() {
     return Promise.resolve()
@@ -40,6 +41,9 @@ export class InMemoryStorageProvider implements StorageProvider {
     for (const [planningId, planning] of this.strategicPlannings) {
       if (planning.organizationId === id) this.strategicPlannings.delete(planningId)
     }
+    for (const [workspaceId, workspace] of this.controlWorkspaces) {
+      if (workspace.organizationId === id) this.controlWorkspaces.delete(workspaceId)
+    }
   }
 
   async getPlans() {
@@ -58,6 +62,9 @@ export class InMemoryStorageProvider implements StorageProvider {
     for (const [planningId, planning] of this.strategicPlannings) {
       if (planning.planId === id) this.strategicPlannings.delete(planningId)
     }
+    for (const [workspaceId, workspace] of this.controlWorkspaces) {
+      if (workspace.planId === id) this.controlWorkspaces.delete(workspaceId)
+    }
   }
 
   async getAIInteractions() {
@@ -74,6 +81,14 @@ export class InMemoryStorageProvider implements StorageProvider {
 
   async saveStrategicPlanning(planning: StrategicPlanning) {
     this.strategicPlannings.set(planning.id, cloneStrategicPlanning(planning))
+  }
+
+  async getControlWorkspaces() {
+    return Array.from(this.controlWorkspaces.values(), cloneControlWorkspace)
+  }
+
+  async saveControlWorkspace(workspace: ControlWorkspace) {
+    this.controlWorkspaces.set(workspace.id, cloneControlWorkspace(workspace))
   }
 }
 
@@ -102,4 +117,8 @@ function cloneAIInteraction(interaction: AIInteraction): AIInteraction {
 
 function cloneStrategicPlanning(planning: StrategicPlanning): StrategicPlanning {
   return structuredClone(planning)
+}
+
+function cloneControlWorkspace(workspace: ControlWorkspace): ControlWorkspace {
+  return structuredClone(workspace)
 }

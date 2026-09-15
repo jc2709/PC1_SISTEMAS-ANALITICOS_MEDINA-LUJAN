@@ -12,16 +12,19 @@ interface HomePageProps {
   selectedSection: NavigationItem
   storageMode: StorageMode
   aiStatus: AIAvailability
+  objectiveCount: number
+  kpiCount: number
+  initiativeCount: number
 }
 
-export function HomePage({ aiStatus, organizationCount, planCount, selectedSection, storageMode }: HomePageProps) {
+export function HomePage({ aiStatus, initiativeCount, kpiCount, objectiveCount, organizationCount, planCount, selectedSection, storageMode }: HomePageProps) {
   const isFutureSection = selectedSection !== 'Inicio'
   const stats = [
     { label: 'Organizaciones', icon: Building2, description: 'Entidades registradas', accent: 'bg-cyan-brand', value: organizationCount },
     { label: 'Planes activos', icon: ClipboardList, description: 'Planes en ejecución', accent: 'bg-blue-500', value: planCount },
-    { label: 'Objetivos', icon: Target, description: 'Objetivos estratégicos', accent: 'bg-violet-500', value: 0 },
-    { label: 'KPI', icon: BarChart3, description: 'Indicadores monitoreados', accent: 'bg-amber-400', value: 0 },
-    { label: 'Iniciativas', icon: Flag, description: 'Iniciativas estratégicas', accent: 'bg-emerald-500', value: 0 },
+    { label: 'Objetivos', icon: Target, description: 'Objetivos estratégicos', accent: 'bg-violet-500', value: objectiveCount },
+    { label: 'KPI', icon: BarChart3, description: 'Indicadores monitoreados', accent: 'bg-amber-400', value: kpiCount },
+    { label: 'Iniciativas', icon: Flag, description: 'Iniciativas estratégicas', accent: 'bg-emerald-500', value: initiativeCount },
   ] as const
 
   return (
@@ -59,9 +62,9 @@ export function HomePage({ aiStatus, organizationCount, planCount, selectedSecti
         <article className="relative min-h-72 overflow-hidden rounded-3xl bg-navy-900 p-7 text-white shadow-[0_18px_50px_rgba(7,20,38,0.18)] sm:p-9">
           <div className="absolute -right-20 -top-28 size-80 rounded-full border-[54px] border-cyan-brand/10" />
           <div className="relative max-w-xl">
-            <span className="inline-flex rounded-full bg-cyan-brand/15 px-3 py-1.5 text-xs font-bold text-cyan-300 ring-1 ring-cyan-brand/20">FASE 4 · INTEGRACIÓN GEMINI</span>
-            <h2 className="mt-5 text-2xl font-bold tracking-tight sm:text-3xl">Convierte el contexto registrado en propuestas estratégicas revisables.</h2>
-            <p className="mt-4 text-sm leading-6 text-slate-300">Gemini se conecta mediante una API segura. Cada propuesta queda bajo control humano y se registra localmente.</p>
+            <span className="inline-flex rounded-full bg-cyan-brand/15 px-3 py-1.5 text-xs font-bold text-cyan-300 ring-1 ring-cyan-brand/20">FASES 6–9 · CONTROL INTEGRADO</span>
+            <h2 className="mt-5 text-2xl font-bold tracking-tight sm:text-3xl">De la estrategia a la medición, ejecución y simulación.</h2>
+            <p className="mt-4 text-sm leading-6 text-slate-300">Objetivos, KPI, iniciativas, escenarios y dashboard comparten una trazabilidad local por plan.</p>
           </div>
         </article>
         <article className="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-[0_8px_28px_rgba(15,23,42,0.05)]">
@@ -73,6 +76,7 @@ export function HomePage({ aiStatus, organizationCount, planCount, selectedSecti
               ['Organizaciones y planes', 'Disponible'],
               ['Persistencia local', 'Disponible'],
               ['Copiloto y bitácora IA', 'Disponible'],
+              ['BSC, Gantt y simulación', 'Disponible'],
             ].map(([label, status]) => (
               <div className="flex items-center justify-between gap-4" key={label}>
                 <span className="text-sm font-medium text-slate-500">{label}</span>

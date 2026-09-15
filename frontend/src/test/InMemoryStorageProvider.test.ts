@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { InMemoryStorageProvider } from '../storage/InMemoryStorageProvider'
 import { buildStrategicPlanning, createEmptyPlanning } from '../services/planningService'
+import { buildControlWorkspace, createEmptyControlWorkspace } from '../services/controlService'
 import type { AIInteraction, AppPreferences, Organization, StrategicPlan } from '../types/models'
 
 describe('InMemoryStorageProvider', () => {
@@ -60,6 +61,8 @@ describe('InMemoryStorageProvider', () => {
     await provider.saveAIInteraction(interaction)
     const planning = buildStrategicPlanning(createEmptyPlanning(organization.id, plan.id))
     await provider.saveStrategicPlanning(planning)
+    const controlWorkspace = buildControlWorkspace(createEmptyControlWorkspace(organization.id, plan.id))
+    await provider.saveControlWorkspace(controlWorkspace)
 
     const storedOrganizations = await provider.getOrganizations()
     expect(storedOrganizations).toEqual([organization])
@@ -67,11 +70,13 @@ describe('InMemoryStorageProvider', () => {
     expect(await provider.getPlans()).toEqual([plan])
     expect(await provider.getAIInteractions()).toEqual([interaction])
     expect(await provider.getStrategicPlannings()).toEqual([planning])
+    expect(await provider.getControlWorkspaces()).toEqual([controlWorkspace])
 
     await provider.deleteOrganization(organization.id)
     expect(await provider.getOrganizations()).toEqual([])
     expect(await provider.getPlans()).toEqual([])
     expect(await provider.getAIInteractions()).toEqual([])
     expect(await provider.getStrategicPlannings()).toEqual([])
+    expect(await provider.getControlWorkspaces()).toEqual([])
   })
 })
