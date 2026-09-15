@@ -16,7 +16,7 @@ Construir una aplicación ejecutiva que conecte organizaciones, planes, objetivo
 - **Persistencia local:** abstracción común con IndexedDB; SQLite queda reservado para una fase posterior si el alcance lo requiere.
 - **IA:** API propia desplegable en Vercel que protege la clave de Gemini, valida respuestas estructuradas y mantiene cada propuesta bajo decisión humana.
 
-Hasta la Fase 9 existe un flujo integrado desde la formulación hasta el control: organizaciones, planes, diagnóstico asistido, planeamiento, mapa estratégico, KPI, iniciativas, Gantt, simulaciones financieras y dashboard ejecutivo. Todo el contenido funcional se conserva localmente por plan; Gemini sigue operando mediante el backend seguro desplegado en Vercel.
+Hasta la Fase 12 existe un flujo integrado desde la formulación hasta el control: organizaciones, planes, diagnóstico asistido, planeamiento, mapa estratégico, KPI, iniciativas, Gantt, simulaciones financieras, dashboard ejecutivo, narrativa IA bajo aprobación humana e importación/exportación de reportes. Todo el contenido funcional se conserva localmente por plan; Gemini sigue operando mediante el backend seguro desplegado en Vercel.
 
 ## Estructura actual
 
@@ -79,20 +79,20 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 | 7 | Iniciativas y Gantt | Completada |
 | 8 | Simulación multiperiodo/multiescenario | Completada |
 | 9 | Dashboard y seguimiento | Completada |
-| 10 | Copiloto y narrativa IA | Pendiente |
-| 11 | Excel, PPT y reportes | Pendiente |
-| 12 | Pruebas integrales | Pendiente |
+| 10 | Copiloto y narrativa IA | Completada |
+| 11 | Excel, PPT y reportes | Completada |
+| 12 | Pruebas integrales | Completada |
 | 13 | Documentación y empaquetado final | Pendiente |
 
 ## Estado actual
 
-**Fases 6–9 — Control estratégico integrado:** el Balanced Scorecard administra objetivos, relaciones causa–efecto y KPI con semáforo; las iniciativas alimentan un Gantt aprobable; el simulador compara escenarios y calcula NOPAT, ROIC y EVA; el dashboard consolida resultados, calidad de datos y estado de ejecución.
+**Fases 10–12 — Decisión, interoperabilidad y calidad:** el dashboard genera narrativa estructurada con control humano; Reportes importa una plantilla Excel validada y exporta XLSX, PPTX y PDF; la suite integral verifica el flujo completo y la seguridad de las API.
 
-Consulte [docs/evidencias/FASES_06_09.md](docs/evidencias/FASES_06_09.md) para ver las decisiones y pruebas, y [docs/manual/CONFIGURACION_GEMINI.md](docs/manual/CONFIGURACION_GEMINI.md) para revisar la conexión sin exponer secretos.
+Consulte [docs/evidencias/FASES_10_12.md](docs/evidencias/FASES_10_12.md) para ver las decisiones y pruebas, y [docs/manual/CONFIGURACION_GEMINI.md](docs/manual/CONFIGURACION_GEMINI.md) para revisar la conexión sin exponer secretos.
 
 ## Backend Gemini
 
-El endpoint disponible es `GET/POST /api/ai/strategic-analysis`. `GET` informa si el proveedor está configurado y `POST` recibe una organización, un plan vinculado y un enfoque opcional. La respuesta se limita a un esquema JSON validado.
+Los endpoints disponibles son `GET/POST /api/ai/strategic-analysis` y `POST /api/ai/explain-dashboard`. El primero genera el diagnóstico inicial; el segundo crea una narrativa ejecutiva separando dato, inferencia, pronóstico y recomendación. Todas las respuestas se limitan a esquemas JSON validados.
 
 Variables privadas del backend:
 

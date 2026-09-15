@@ -22,6 +22,7 @@ export function createEmptyControlWorkspace(organizationId: string, planId: stri
     initiatives: [],
     scheduleApproved: false,
     simulations: [],
+    executiveNarratives: [],
   }
 }
 
@@ -46,6 +47,7 @@ export function toControlWorkspaceInput(workspace: ControlWorkspace): ControlWor
     initiatives: structuredClone(workspace.initiatives),
     scheduleApproved: workspace.scheduleApproved,
     simulations: structuredClone(workspace.simulations),
+    executiveNarratives: structuredClone(workspace.executiveNarratives ?? []),
   }
 }
 

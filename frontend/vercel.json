@@ -6,6 +6,9 @@
   "functions": {
     "api/ai/strategic-analysis.ts": {
       "maxDuration": 60
+    },
+    "api/ai/explain-dashboard.ts": {
+      "maxDuration": 60
     }
   }
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { checkAIConnection, requestStrategicAnalysis, type AIConnectionState, type StrategicAnalysisRequest } from '../services/aiService'
+import { checkAIConnection, requestExecutiveNarrative, requestStrategicAnalysis, type AIConnectionState, type ExecutiveNarrativeRequest, type StrategicAnalysisRequest } from '../services/aiService'
 
 const INITIAL_STATE: AIConnectionState = {
   status: 'NOT_CONFIGURED',
@@ -37,5 +37,17 @@ export function useAIGateway(apiBaseUrl: string) {
     }
   }, [apiBaseUrl])
 
-  return { analyze, connection, refresh }
+  const explainDashboard = useCallback(async (input: ExecutiveNarrativeRequest) => {
+    setConnection((current) => ({ ...current, status: 'PROCESSING', message: 'Gemini está preparando la narrativa ejecutiva.' }))
+    try {
+      const result = await requestExecutiveNarrative(apiBaseUrl, input)
+      setConnection({ status: 'CONNECTED', message: 'Backend seguro disponible.', model: result.model })
+      return result
+    } catch (error) {
+      setConnection((current) => ({ ...current, status: 'ERROR', message: error instanceof Error ? error.message : 'IA no disponible temporalmente.' }))
+      throw error
+    }
+  }, [apiBaseUrl])
+
+  return { analyze, connection, explainDashboard, refresh }
 }

@@ -215,6 +215,27 @@ export interface SimulationRun {
   createdAt: string
 }
 
+export interface ExecutiveNarrativeContent {
+  data: string
+  inference: string
+  forecast: string
+  recommendation: string
+  confidence: number
+}
+
+export interface ExecutiveNarrative {
+  id: string
+  prompt: string
+  response: string
+  model: string
+  createdAt: string
+  updatedAt: string
+  status: AIInteractionStatus
+  approvedByUser: boolean
+  userEdited: boolean
+  finalContent: ExecutiveNarrativeContent
+}
+
 export interface ControlWorkspace {
   id: string
   organizationId: Organization['id']
@@ -225,6 +246,7 @@ export interface ControlWorkspace {
   initiatives: Initiative[]
   scheduleApproved: boolean
   simulations: SimulationRun[]
+  executiveNarratives?: ExecutiveNarrative[]
   createdAt: string
   updatedAt: string
 }

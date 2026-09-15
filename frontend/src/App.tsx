@@ -12,6 +12,7 @@ import { BSCPage } from './pages/BSCPage'
 import { InitiativesPage } from './pages/InitiativesPage'
 import { SimulationPage } from './pages/SimulationPage'
 import { ExecutiveDashboardPage } from './pages/ExecutiveDashboardPage'
+import { ReportsPage } from './pages/ReportsPage'
 
 export type NavigationItem =
   | 'Inicio'
@@ -21,6 +22,7 @@ export type NavigationItem =
   | 'Iniciativas'
   | 'Simulación'
   | 'Dashboard'
+  | 'Reportes'
   | 'IA'
   | 'Configuración'
 
@@ -52,7 +54,9 @@ function App() {
       ) : activeItem === 'Simulación' ? (
         <SimulationPage controlWorkspaces={workspace.controlWorkspaces} onSave={workspace.saveControlWorkspace} organizations={workspace.organizations} plans={workspace.plans} />
       ) : activeItem === 'Dashboard' ? (
-        <ExecutiveDashboardPage controlWorkspaces={workspace.controlWorkspaces} organizations={workspace.organizations} plans={workspace.plans} />
+        <ExecutiveDashboardPage aiConnection={ai.connection} controlWorkspaces={workspace.controlWorkspaces} onExplain={ai.explainDashboard} onSave={workspace.saveControlWorkspace} organizations={workspace.organizations} plans={workspace.plans} />
+      ) : activeItem === 'Reportes' ? (
+        <ReportsPage controlWorkspaces={workspace.controlWorkspaces} onSave={workspace.saveControlWorkspace} organizations={workspace.organizations} plans={workspace.plans} strategicPlannings={workspace.strategicPlannings} />
       ) : activeItem === 'Configuración' ? (
         <SettingsPage aiApiBaseUrl={preferences.aiApiBaseUrl} compactSidebar={preferences.compactSidebar} onAiApiBaseUrlChange={setAiApiBaseUrl} onCompactSidebarChange={setCompactSidebar} storageMode={mode} />
       ) : (
@@ -62,7 +66,7 @@ function App() {
   )
 }
 
-const navigationItems: NavigationItem[] = ['Inicio', 'Organización', 'Planeamiento', 'Balanced Scorecard', 'Iniciativas', 'Simulación', 'Dashboard', 'IA', 'Configuración']
+const navigationItems: NavigationItem[] = ['Inicio', 'Organización', 'Planeamiento', 'Balanced Scorecard', 'Iniciativas', 'Simulación', 'Dashboard', 'Reportes', 'IA', 'Configuración']
 
 function isNavigationItem(value: string): value is NavigationItem {
   return navigationItems.includes(value as NavigationItem)

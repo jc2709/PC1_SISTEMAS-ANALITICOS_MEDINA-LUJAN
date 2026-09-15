@@ -20,6 +20,10 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'Copiloto IA' })).toBeInTheDocument()
     expect(screen.getByText('Primero registra una organización y un plan estratégico.')).toBeInTheDocument()
 
+    fireEvent.click(screen.getByRole('button', { name: 'Reportes' }))
+    expect(screen.getByRole('heading', { name: 'Excel, PowerPoint y reportes' })).toBeInTheDocument()
+    expect(screen.getByText('Sin datos exportables')).toBeInTheDocument()
+
     fireEvent.click(screen.getByRole('button', { name: 'Configuración' }))
     const compactSwitch = screen.getByRole('switch', { name: 'Navegación compacta' })
     fireEvent.click(compactSwitch)

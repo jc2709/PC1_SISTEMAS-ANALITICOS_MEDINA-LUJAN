@@ -1,7 +1,7 @@
 {
   "name": "@gceia/frontend",
   "private": true,
-  "version": "0.9.0",
+  "version": "0.12.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "fflate": "^0.8.3",
+    "jspdf": "^4.2.1",
     "lucide-react": "^1.46.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

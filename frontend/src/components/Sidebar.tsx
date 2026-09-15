@@ -1,4 +1,4 @@
-import { BarChart3, Bot, Building2, Flag, Gauge, LayoutDashboard, Settings, SlidersHorizontal, Target, X, type LucideIcon } from 'lucide-react'
+import { BarChart3, Bot, Building2, FileBarChart, Flag, Gauge, LayoutDashboard, Settings, SlidersHorizontal, Target, X, type LucideIcon } from 'lucide-react'
 import type { NavigationItem } from '../App'
 import type { AIAvailability } from '../services/aiService'
 import { AIStatusBadge } from './AIStatusBadge'
@@ -21,6 +21,7 @@ const navigation: Array<{ label: NavigationItem; icon: LucideIcon }> = [
   { label: 'Iniciativas', icon: Flag },
   { label: 'Simulación', icon: SlidersHorizontal },
   { label: 'Dashboard', icon: Gauge },
+  { label: 'Reportes', icon: FileBarChart },
   { label: 'IA', icon: Bot },
   { label: 'Configuración', icon: Settings },
 ]

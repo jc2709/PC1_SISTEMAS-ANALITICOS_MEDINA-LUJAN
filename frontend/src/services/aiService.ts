@@ -1,4 +1,4 @@
-import type { AIInteraction, Organization, StrategicAnalysisContent, StrategicPlan } from '../types/models'
+import type { AIInteraction, ControlWorkspace, ExecutiveNarrative, ExecutiveNarrativeContent, Organization, StrategicAnalysisContent, StrategicPlan } from '../types/models'
 
 export type AIAvailability = 'NOT_CONFIGURED' | 'CHECKING' | 'CONNECTED' | 'OFFLINE' | 'PROCESSING' | 'ERROR'
 
@@ -16,6 +16,18 @@ export interface StrategicAnalysisRequest {
 
 export interface StrategicAnalysisResult {
   analysis: StrategicAnalysisContent
+  model: string
+}
+
+export interface ExecutiveNarrativeRequest {
+  organization: Organization
+  plan: StrategicPlan
+  workspace: ControlWorkspace
+  focus: string
+}
+
+export interface ExecutiveNarrativeResult {
+  narrative: ExecutiveNarrativeContent
   model: string
 }
 
@@ -62,6 +74,57 @@ export async function requestStrategicAnalysis(apiBaseUrl: string, input: Strate
   }
 }
 
+export async function requestExecutiveNarrative(apiBaseUrl: string, input: ExecutiveNarrativeRequest): Promise<ExecutiveNarrativeResult> {
+  if (!apiBaseUrl.trim()) throw new Error('Configura primero la URL del backend de IA.')
+
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  try {
+    const response = await fetch(buildNarrativeEndpoint(apiBaseUrl), {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildExecutiveNarrativePayload(input)),
+      signal: controller.signal,
+    })
+    const payload = await readJson(response)
+    if (!response.ok) throw new Error(readError(payload, 'Gemini no pudo explicar el dashboard.'))
+    return validateExecutiveNarrativeResult(payload)
+  } catch (error) {
+    if (isAbortError(error)) throw new Error('La solicitud superó el tiempo máximo. Inténtalo nuevamente.')
+    throw error instanceof Error ? error : new Error('IA no disponible temporalmente.')
+  } finally {
+    window.clearTimeout(timeout)
+  }
+}
+
+export function createExecutiveNarrative(input: ExecutiveNarrativeRequest, result: ExecutiveNarrativeResult): ExecutiveNarrative {
+  const timestamp = new Date().toISOString()
+  return {
+    id: crypto.randomUUID(),
+    prompt: JSON.stringify({ focus: input.focus.trim(), organization: input.organization.name, plan: input.plan.name }),
+    response: JSON.stringify(result.narrative),
+    model: result.model,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    status: 'AI_PROPOSED',
+    approvedByUser: false,
+    userEdited: false,
+    finalContent: result.narrative,
+  }
+}
+
+export function updateExecutiveNarrative(narrative: ExecutiveNarrative, decision: 'APPROVED' | 'REJECTED' | 'USER_EDITED', content?: ExecutiveNarrativeContent): ExecutiveNarrative {
+  const finalContent = content ?? narrative.finalContent
+  return {
+    ...narrative,
+    finalContent,
+    status: decision,
+    approvedByUser: decision === 'APPROVED',
+    userEdited: narrative.userEdited || decision === 'USER_EDITED',
+    updatedAt: new Date().toISOString(),
+  }
+}
+
 export function createAIInteraction(input: StrategicAnalysisRequest, result: StrategicAnalysisResult): AIInteraction {
   const timestamp = new Date().toISOString()
   return {
@@ -101,6 +164,43 @@ export function updateAIInteraction(
 
 function buildEndpoint(apiBaseUrl: string) {
   return `${apiBaseUrl.trim().replace(/\/+$/, '')}/api/ai/strategic-analysis`
+}
+
+function buildNarrativeEndpoint(apiBaseUrl: string) {
+  return `${apiBaseUrl.trim().replace(/\/+$/, '')}/api/ai/explain-dashboard`
+}
+
+function buildExecutiveNarrativePayload(input: ExecutiveNarrativeRequest) {
+  const latestSimulation = [...input.workspace.simulations].sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0]
+  return {
+    organization: { id: input.organization.id, name: input.organization.name, sector: input.organization.sector },
+    plan: { id: input.plan.id, organizationId: input.plan.organizationId, name: input.plan.name, startYear: input.plan.startYear, endYear: input.plan.endYear },
+    focus: input.focus.trim(),
+    dashboard: {
+      objectives: input.workspace.objectives.map((objective) => ({ id: objective.id, name: objective.name, perspective: objective.perspective })),
+      kpis: input.workspace.kpis.map((kpi) => ({ name: kpi.name, unit: kpi.unit, actual: kpi.actual, target: kpi.target, trajectory: kpi.trajectory, forecast: kpi.forecast, dataQuality: kpi.dataQuality, deviationAction: kpi.deviationAction })),
+      initiatives: input.workspace.initiatives.map((initiative) => ({ name: initiative.name, status: initiative.status, progress: initiative.progress, endDate: initiative.endDate, risk: initiative.risk })),
+      latestSimulation: latestSimulation ? { period: latestSimulation.period, scenario: latestSimulation.scenario, inputs: latestSimulation.inputs, outputs: latestSimulation.outputs } : null,
+    },
+  }
+}
+
+function validateExecutiveNarrativeResult(value: Record<string, unknown>): ExecutiveNarrativeResult {
+  const narrative = value.narrative
+  if (!isRecord(narrative)) throw new Error('El backend devolvió una narrativa inválida.')
+  const confidence = typeof narrative.confidence === 'number' ? narrative.confidence : Number.NaN
+  if (!Number.isFinite(confidence) || confidence < 0 || confidence > 1) throw new Error('El nivel de confianza de la narrativa no es válido.')
+  if (typeof value.model !== 'string' || !value.model.trim()) throw new Error('El backend no identificó el modelo utilizado.')
+  return {
+    narrative: {
+      data: readRequiredString(narrative.data, 'dato'),
+      inference: readRequiredString(narrative.inference, 'inferencia'),
+      forecast: readRequiredString(narrative.forecast, 'pronóstico'),
+      recommendation: readRequiredString(narrative.recommendation, 'recomendación'),
+      confidence,
+    },
+    model: value.model,
+  }
 }
 
 function validateStrategicAnalysisResult(value: Record<string, unknown>): StrategicAnalysisResult {
