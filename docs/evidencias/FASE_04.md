@@ -43,6 +43,7 @@ Sin un backend desplegado puedes abrir el módulo IA, consultar su estado, confi
 - `frontend/server/ai/strategicAnalysis.ts`
 - `frontend/server/ai/strategicAnalysisHandler.ts`
 - `frontend/vercel.json` (compatibilidad cuando Vercel usa `frontend` como directorio raíz)
+- `frontend/package.json` declara como opcionales los binarios Linux de Tailwind/Lightning CSS requeridos por Vercel
 - `vercel.json`
 - `tsconfig.api.json`
 - `frontend/src/pages/AIPage.tsx`
