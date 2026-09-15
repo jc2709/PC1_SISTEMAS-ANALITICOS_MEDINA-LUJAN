@@ -1,4 +1,4 @@
-import { buildExecutiveNarrativePrompt, EXECUTIVE_NARRATIVE_SCHEMA, extractNarrativeGeminiText, parseExecutiveNarrative, parseExecutiveNarrativeInput } from './executiveNarrative.js'
+import { buildExecutiveNarrativePrompt, EXECUTIVE_NARRATIVE_SCHEMA, extractNarrativeGeminiText, parseExecutiveNarrative, parseExecutiveNarrativeInput, parseExecutiveNarrativeText } from './executiveNarrative.js'
 
 const DEFAULT_MODEL = 'gemini-2.5-flash'
 const FALLBACK_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite']
@@ -35,7 +35,7 @@ export default {
       try { geminiPayload = await response.json() as unknown } catch { return json({ error: 'Gemini devolvió una respuesta ilegible. Puedes reintentar.' }, 502, cors.headers) }
       if (!response.ok) return json({ error: mapGeminiError(response.status), upstreamStatus: response.status }, 502, cors.headers)
       let narrativePayload: unknown
-      try { narrativePayload = JSON.parse(extractNarrativeGeminiText(geminiPayload)) as unknown } catch { return json({ error: 'Gemini devolvió JSON inválido. Puedes reintentar.' }, 502, cors.headers) }
+      try { narrativePayload = parseExecutiveNarrativeText(extractNarrativeGeminiText(geminiPayload)) } catch { return json({ error: 'Gemini devolvió JSON inválido. Puedes reintentar.' }, 502, cors.headers) }
       return json({ narrative: parseExecutiveNarrative(narrativePayload), model: activeModel, promptVersion: 'executive-narrative-v1' }, 200, cors.headers)
     } catch (error) {
       if (error instanceof DOMException && error.name === 'TimeoutError') return json({ error: 'Gemini superó el tiempo máximo de respuesta.' }, 504, cors.headers)

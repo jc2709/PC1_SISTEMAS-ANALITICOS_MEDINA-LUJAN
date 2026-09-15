@@ -101,6 +101,14 @@ export function extractNarrativeGeminiText(value: unknown) {
   return text
 }
 
+export function parseExecutiveNarrativeText(text: string) {
+  const withoutFence = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+  const start = withoutFence.indexOf('{')
+  const end = withoutFence.lastIndexOf('}')
+  if (start < 0 || end <= start) throw new Error('Gemini devolvió JSON inválido.')
+  return JSON.parse(withoutFence.slice(start, end + 1)) as unknown
+}
+
 function requiredString(value: unknown, field: string, maxLength: number) {
   if (typeof value !== 'string' || !value.trim()) throw new Error(`El campo ${field} es obligatorio.`)
   if (value.length > maxLength) throw new Error(`El campo ${field} supera el tamaño permitido.`)

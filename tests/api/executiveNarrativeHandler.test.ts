@@ -35,6 +35,15 @@ describe('executiveNarrativeHandler', () => {
     expect(JSON.stringify(payload)).not.toContain('secret-test')
   })
 
+  it('acepta JSON estructurado envuelto en un bloque Markdown', async () => {
+    process.env[KEY] = 'secret-test'
+    const narrative = { data: 'OTIF 91%.', inference: 'Existe una brecha.', forecast: 'Podría mejorar.', recommendation: 'Priorizar mantenimiento.', confidence: 0.8 }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: `\`\`\`json\n${JSON.stringify(narrative)}\n\`\`\`` }] } }] }), { status: 200 })))
+    const response = await handler.fetch(new Request('https://example.vercel.app/api/ai/explain-dashboard', { method: 'POST', body: JSON.stringify(requestBody) }))
+    expect(response.status).toBe(200)
+    expect((await response.json()).narrative).toEqual(narrative)
+  })
+
   it('rechaza un plan ajeno a la organización', async () => {
     process.env[KEY] = 'secret-test'
     const response = await handler.fetch(new Request('https://example.vercel.app/api/ai/explain-dashboard', { method: 'POST', body: JSON.stringify({ ...requestBody, plan: { ...requestBody.plan, organizationId: 'org-2' } }) }))
