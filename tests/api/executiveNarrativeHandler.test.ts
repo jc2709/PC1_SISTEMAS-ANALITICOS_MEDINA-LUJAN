@@ -44,6 +44,19 @@ describe('executiveNarrativeHandler', () => {
     expect((await response.json()).narrative).toEqual(narrative)
   })
 
+  it('prueba un modelo de contingencia cuando el principal devuelve texto inválido', async () => {
+    process.env[KEY] = 'secret-test'
+    const narrative = { data: 'OTIF 91%.', inference: 'Existe brecha.', forecast: 'Mejora condicional.', recommendation: 'Priorizar mantenimiento.', confidence: 0.82 }
+    const geminiFetch = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'sin json' }] } }] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(narrative) }] } }] }), { status: 200 }))
+    vi.stubGlobal('fetch', geminiFetch)
+    const response = await handler.fetch(new Request('https://example.vercel.app/api/ai/explain-dashboard', { method: 'POST', body: JSON.stringify(requestBody) }))
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ narrative, model: 'gemini-3.6-flash', promptVersion: 'executive-narrative-v1' })
+    expect(geminiFetch).toHaveBeenCalledTimes(2)
+  })
+
   it('rechaza un plan ajeno a la organización', async () => {
     process.env[KEY] = 'secret-test'
     const response = await handler.fetch(new Request('https://example.vercel.app/api/ai/explain-dashboard', { method: 'POST', body: JSON.stringify({ ...requestBody, plan: { ...requestBody.plan, organizationId: 'org-2' } }) }))

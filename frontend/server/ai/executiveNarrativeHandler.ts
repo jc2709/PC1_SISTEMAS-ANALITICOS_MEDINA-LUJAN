@@ -24,19 +24,22 @@ export default {
         contents: [{ role: 'user', parts: [{ text: buildExecutiveNarrativePrompt(input) }] }],
         generationConfig: { temperature: 0.15, maxOutputTokens: 2_048, responseMimeType: 'application/json', responseJsonSchema: EXECUTIVE_NARRATIVE_SCHEMA },
       })
-      let activeModel = getModel()
-      let response = await requestGemini(activeModel, body)
-      for (const fallbackModel of FALLBACK_MODELS) {
-        if (![404, 503].includes(response.status) || fallbackModel === activeModel) continue
-        activeModel = fallbackModel
-        response = await requestGemini(activeModel, body)
+      const models = Array.from(new Set([getModel(), ...FALLBACK_MODELS]))
+      let lastStatus = 502
+      for (const activeModel of models) {
+        const response = await requestGemini(activeModel, body)
+        lastStatus = response.status
+        if ([404, 503].includes(response.status)) continue
+        let geminiPayload: unknown
+        try { geminiPayload = await response.json() as unknown } catch { continue }
+        if (!response.ok) return json({ error: mapGeminiError(response.status), upstreamStatus: response.status }, 502, cors.headers)
+        try {
+          const narrativePayload = parseExecutiveNarrativeText(extractNarrativeGeminiText(geminiPayload))
+          const narrative = parseExecutiveNarrative(narrativePayload)
+          return json({ narrative, model: activeModel, promptVersion: 'executive-narrative-v1' }, 200, cors.headers)
+        } catch { continue }
       }
-      let geminiPayload: unknown
-      try { geminiPayload = await response.json() as unknown } catch { return json({ error: 'Gemini devolvió una respuesta ilegible. Puedes reintentar.' }, 502, cors.headers) }
-      if (!response.ok) return json({ error: mapGeminiError(response.status), upstreamStatus: response.status }, 502, cors.headers)
-      let narrativePayload: unknown
-      try { narrativePayload = parseExecutiveNarrativeText(extractNarrativeGeminiText(geminiPayload)) } catch { return json({ error: 'Gemini devolvió JSON inválido. Puedes reintentar.' }, 502, cors.headers) }
-      return json({ narrative: parseExecutiveNarrative(narrativePayload), model: activeModel, promptVersion: 'executive-narrative-v1' }, 200, cors.headers)
+      return json({ error: 'Gemini devolvió JSON inválido en todos los modelos disponibles. Puedes reintentar.', upstreamStatus: lastStatus }, 502, cors.headers)
     } catch (error) {
       if (error instanceof DOMException && error.name === 'TimeoutError') return json({ error: 'Gemini superó el tiempo máximo de respuesta.' }, 504, cors.headers)
       const message = error instanceof Error ? error.message : 'No se pudo generar la narrativa.'
