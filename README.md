@@ -14,7 +14,7 @@ Construir una aplicación ejecutiva que conecte organizaciones, planes, objetivo
 - **Persistencia local:** abstracción común con IndexedDB; SQLite queda reservado para una fase posterior si el alcance lo requiere.
 - **IA:** API propia desplegable en Vercel que protegerá la clave de Gemini. El frontend nunca contendrá secretos.
 
-Hasta la Fase 2 hay frontend, persistencia mínima y entregables locales; todavía no hay backend ni conexión con Gemini.
+Hasta la Fase 3 hay frontend, persistencia local, organizaciones, planes y entregables ejecutables; todavía no hay backend ni conexión con Gemini.
 
 ## Estructura actual
 
@@ -30,6 +30,7 @@ Hasta la Fase 2 hay frontend, persistencia mínima y entregables locales; todav�
 │       ├── layouts/      # Estructura visual principal
 │       ├── pages/        # Pantallas funcionales
 │       ├── hooks/        # Estado y preferencias de la interfaz
+│       ├── services/     # Validación y reglas de aplicación
 │       ├── storage/      # Abstracción y proveedores de almacenamiento
 │       ├── test/         # Configuración y pruebas
 │       └── types/        # Modelos TypeScript iniciales
@@ -39,7 +40,7 @@ Hasta la Fase 2 hay frontend, persistencia mínima y entregables locales; todav�
 └── package.json          # Comandos del proyecto
 ```
 
-Las carpetas de backend, persistencia, empaquetado y exportaciones se crearán únicamente cuando su fase las requiera.
+Las carpetas de backend y exportaciones se crearán únicamente cuando su fase las requiera.
 
 ## Desarrollo local
 
@@ -67,7 +68,7 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 | 0 | Fundación del repositorio | Completada |
 | 1 | Shell visual y almacenamiento mínimo | Completada |
 | 2 | Prototipo HTML local y prototipo EXE | Completada con observación |
-| 3 | Organizaciones y planes | Pendiente |
+| 3 | Organizaciones y planes | Completada |
 | 4 | Integración Gemini y backend Vercel | Pendiente |
 | 5 | Planeamiento estratégico | Pendiente |
 | 6 | Balanced Scorecard | Pendiente |
@@ -81,9 +82,9 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 
 ## Estado actual
 
-**Fase 2 — HTML local y EXE:** el frontend genera un `index.html` autocontenido y un único `GestionControlEstrategicoIA.exe` portable basado en Electron. `win-unpacked` se conserva solo como respaldo técnico de desarrollo.
+**Fase 3 — Organizaciones y planes:** la aplicación permite crear, consultar, editar y eliminar múltiples organizaciones, además de administrar varios planes estratégicos vinculados por periodo y estado. Los datos permanecen en IndexedDB local y el Inicio muestra conteos reales.
 
-Consulte [docs/evidencias/FASE_02.md](docs/evidencias/FASE_02.md) para ver las decisiones, pruebas y modo de uso de esta entrega.
+Consulte [docs/evidencias/FASE_03.md](docs/evidencias/FASE_03.md) para ver las decisiones, pruebas y modo de uso de esta entrega.
 
 ## Generar HTML y aplicación Windows
 

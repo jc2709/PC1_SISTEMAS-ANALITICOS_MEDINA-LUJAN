@@ -3,6 +3,15 @@ export interface Organization {
   name: string
   sector: string
   description: string
+  productsOrServices: string[]
+  customerSegments: string[]
+  markets: string[]
+  competitors: string[]
+  currentMission: string
+  currentVision: string
+  principles: string[]
+  financialInformation: string
+  operationalInformation: string
   createdAt: string
   updatedAt: string
 }
@@ -25,3 +34,6 @@ export interface AppPreferences {
   compactSidebar: boolean
   lastSection: string
 }
+
+export type OrganizationInput = Omit<Organization, 'id' | 'createdAt' | 'updatedAt'>
+export type StrategicPlanInput = Omit<StrategicPlan, 'id' | 'createdAt' | 'updatedAt'>

@@ -4,18 +4,22 @@ import { StatCard } from '../components/StatCard'
 import { StorageBadge } from '../components/StorageBadge'
 import type { StorageMode } from '../storage/StorageProvider'
 
-interface HomePageProps { selectedSection: NavigationItem; storageMode: StorageMode }
+interface HomePageProps {
+  organizationCount: number
+  planCount: number
+  selectedSection: NavigationItem
+  storageMode: StorageMode
+}
 
-const stats = [
-  { label: 'Organizaciones', icon: Building2, description: 'Entidades registradas', accent: 'bg-cyan-brand' },
-  { label: 'Planes activos', icon: ClipboardList, description: 'Planes en ejecución', accent: 'bg-blue-500' },
-  { label: 'Objetivos', icon: Target, description: 'Objetivos estratégicos', accent: 'bg-violet-500' },
-  { label: 'KPI', icon: BarChart3, description: 'Indicadores monitoreados', accent: 'bg-amber-400' },
-  { label: 'Iniciativas', icon: Flag, description: 'Iniciativas estratégicas', accent: 'bg-emerald-500' },
-] as const
-
-export function HomePage({ selectedSection, storageMode }: HomePageProps) {
+export function HomePage({ organizationCount, planCount, selectedSection, storageMode }: HomePageProps) {
   const isFutureSection = selectedSection !== 'Inicio'
+  const stats = [
+    { label: 'Organizaciones', icon: Building2, description: 'Entidades registradas', accent: 'bg-cyan-brand', value: organizationCount },
+    { label: 'Planes activos', icon: ClipboardList, description: 'Planes en ejecución', accent: 'bg-blue-500', value: planCount },
+    { label: 'Objetivos', icon: Target, description: 'Objetivos estratégicos', accent: 'bg-violet-500', value: 0 },
+    { label: 'KPI', icon: BarChart3, description: 'Indicadores monitoreados', accent: 'bg-amber-400', value: 0 },
+    { label: 'Iniciativas', icon: Flag, description: 'Iniciativas estratégicas', accent: 'bg-emerald-500', value: 0 },
+  ] as const
 
   return (
     <div className="mx-auto max-w-[1500px]">
@@ -44,7 +48,7 @@ export function HomePage({ selectedSection, storageMode }: HomePageProps) {
           <span className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-400 ring-1 ring-slate-200">Sin datos aún</span>
         </div>
         <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          {stats.map((stat) => <StatCard {...stat} key={stat.label} value={0} />)}
+          {stats.map((stat) => <StatCard {...stat} key={stat.label} />)}
         </div>
       </section>
 
@@ -52,9 +56,9 @@ export function HomePage({ selectedSection, storageMode }: HomePageProps) {
         <article className="relative min-h-72 overflow-hidden rounded-3xl bg-navy-900 p-7 text-white shadow-[0_18px_50px_rgba(7,20,38,0.18)] sm:p-9">
           <div className="absolute -right-20 -top-28 size-80 rounded-full border-[54px] border-cyan-brand/10" />
           <div className="relative max-w-xl">
-            <span className="inline-flex rounded-full bg-cyan-brand/15 px-3 py-1.5 text-xs font-bold text-cyan-300 ring-1 ring-cyan-brand/20">FASE 1 · BASE LOCAL</span>
-            <h2 className="mt-5 text-2xl font-bold tracking-tight sm:text-3xl">Tu espacio estratégico ya recuerda tus preferencias.</h2>
-            <p className="mt-4 text-sm leading-6 text-slate-300">La navegación y la configuración visual se guardan localmente en este dispositivo, sin enviar información a servicios externos.</p>
+            <span className="inline-flex rounded-full bg-cyan-brand/15 px-3 py-1.5 text-xs font-bold text-cyan-300 ring-1 ring-cyan-brand/20">FASE 3 · ORGANIZACIONES Y PLANES</span>
+            <h2 className="mt-5 text-2xl font-bold tracking-tight sm:text-3xl">Construye un portafolio estratégico para múltiples organizaciones.</h2>
+            <p className="mt-4 text-sm leading-6 text-slate-300">Registra el contexto de cada entidad y crea sus planes por periodo. La información permanece local en este dispositivo.</p>
           </div>
         </article>
         <article className="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-[0_8px_28px_rgba(15,23,42,0.05)]">
@@ -63,7 +67,7 @@ export function HomePage({ selectedSection, storageMode }: HomePageProps) {
           <div className="mt-6 space-y-5">
             {[
               ['Interfaz principal', 'Disponible'],
-              ['Modelos iniciales', 'Preparados'],
+              ['Organizaciones y planes', 'Disponible'],
               ['Persistencia local', 'Disponible'],
             ].map(([label, status]) => (
               <div className="flex items-center justify-between gap-4" key={label}>

@@ -53,20 +53,29 @@ function createWindow() {
             resolve(true)
           }
         })
-        const bodyText = await new Promise((resolve) => {
+        const waitForText = (expectedText) => new Promise((resolve) => {
           const deadline = Date.now() + 5000
           const checkContent = () => {
             const text = document.body.innerText.replace(/\\s+/g, ' ')
-            if (text.includes('Datos locales:') || Date.now() >= deadline) resolve(text)
+            if (text.includes(expectedText) || Date.now() >= deadline) resolve(text)
             else setTimeout(checkContent, 100)
           }
           checkContent()
         })
+        await waitForText('Datos locales:')
+        document.querySelector('[aria-label="Inicio"]')?.click()
+        const bodyText = await waitForText('GESTIÓN Y CONTROL ESTRATÉGICO IA')
+        document.querySelector('[aria-label="Organización"]')?.click()
+        const organizationText = await waitForText('Directorio estratégico')
+        document.querySelector('[aria-label="Planeamiento"]')?.click()
+        const plansText = await waitForText('Portafolio de planes')
         return {
           title: document.title,
           hasHeading: bodyText.includes('GESTIÓN Y CONTROL ESTRATÉGICO IA'),
           hasLocalStorageStatus: bodyText.includes('Datos locales: Listos'),
           indexedDbReady,
+          hasOrganizationsModule: organizationText.includes('Organizaciones'),
+          hasPlansModule: plansText.includes('Planes estratégicos'),
         }
       })()`)
       finishSmokeTest({ ok: Object.values(result).every(Boolean), ...result })

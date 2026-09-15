@@ -1,7 +1,7 @@
 {
   "name": "gestion-control-estrategico-ia",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Planeamiento estratégico y Balanced Scorecard asistidos por IA",
   "author": "Medina - Luján",
   "main": "desktop/main.cjs",
