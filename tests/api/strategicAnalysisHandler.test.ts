@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import handler from '../../api/ai/strategic-analysis.js'
+import handler from '../../frontend/server/ai/strategicAnalysisHandler.js'
 
 const KEY_ENV_NAME = 'GEMINI_API_KEY'
 

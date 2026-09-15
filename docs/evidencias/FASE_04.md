@@ -40,7 +40,9 @@ Sin un backend desplegado puedes abrir el módulo IA, consultar su estado, confi
 ## Archivos principales
 
 - `api/ai/strategic-analysis.ts`
-- `backend/ai/strategicAnalysis.ts`
+- `frontend/server/ai/strategicAnalysis.ts`
+- `frontend/server/ai/strategicAnalysisHandler.ts`
+- `frontend/vercel.json` (compatibilidad cuando Vercel usa `frontend` como directorio raíz)
 - `vercel.json`
 - `tsconfig.api.json`
 - `frontend/src/pages/AIPage.tsx`

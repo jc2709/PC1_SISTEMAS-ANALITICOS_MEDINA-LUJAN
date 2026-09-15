@@ -11,6 +11,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["api/**/*.ts", "backend/**/*.ts"],
-  "exclude": ["api/**/*.test.ts", "backend/**/*.test.ts"]
+  "include": ["api/**/*.ts", "frontend/api/**/*.ts", "frontend/server/**/*.ts"],
+  "exclude": ["api/**/*.test.ts", "frontend/**/*.test.ts", "tests/**/*.ts"]
 }
