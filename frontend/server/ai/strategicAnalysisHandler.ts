@@ -1,7 +1,7 @@
 import { buildStrategicAnalysisPrompt, extractGeminiText, parseGeminiAnalysis, parseStrategicAnalysisInput, STRATEGIC_ANALYSIS_SCHEMA } from './strategicAnalysis.js'
 
 const DEFAULT_MODEL = 'gemini-2.5-flash'
-const FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash-lite']
+const FALLBACK_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite']
 const MAX_REQUEST_BYTES = 30_000
 
 export const config = { maxDuration: 60 }

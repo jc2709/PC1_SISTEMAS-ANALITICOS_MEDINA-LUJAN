@@ -81,7 +81,7 @@ describe('strategic-analysis endpoint', () => {
     }))
 
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({ analysis, model: 'gemini-flash-latest', promptVersion: 'strategic-analysis-v1' })
+    expect(await response.json()).toEqual({ analysis, model: 'gemini-3.6-flash', promptVersion: 'strategic-analysis-v1' })
     expect(geminiFetch).toHaveBeenCalledTimes(2)
   })
 
@@ -91,6 +91,7 @@ describe('strategic-analysis endpoint', () => {
     const geminiFetch = vi.fn()
       .mockResolvedValueOnce(new Response('{}', { status: 404 }))
       .mockResolvedValueOnce(new Response('{}', { status: 503 }))
+      .mockResolvedValueOnce(new Response('{}', { status: 503 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(analysis) }] } }] }), { status: 200 }))
     vi.stubGlobal('fetch', geminiFetch)
 
@@ -99,7 +100,7 @@ describe('strategic-analysis endpoint', () => {
     }))
 
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({ analysis, model: 'gemini-2.5-flash-lite', promptVersion: 'strategic-analysis-v1' })
-    expect(geminiFetch).toHaveBeenCalledTimes(3)
+    expect(await response.json()).toEqual({ analysis, model: 'gemini-flash-latest', promptVersion: 'strategic-analysis-v1' })
+    expect(geminiFetch).toHaveBeenCalledTimes(4)
   })
 })
