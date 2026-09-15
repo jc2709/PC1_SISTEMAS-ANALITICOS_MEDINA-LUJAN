@@ -6,9 +6,10 @@ import type { StorageMode, StorageProvider } from '../storage/StorageProvider'
 import type { AppPreferences } from '../types/models'
 
 const DEFAULT_PREFERENCES: AppPreferences = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   compactSidebar: false,
   lastSection: 'Inicio',
+  aiApiBaseUrl: getDefaultAIBaseUrl(),
 }
 
 interface PreferencesState {
@@ -37,7 +38,7 @@ export function useAppPreferences() {
         await provider.initialize()
         const stored = await provider.getAppPreferences()
         if (!isActive) return
-        setState({ isLoading: false, mode: provider.mode, preferences: stored ?? DEFAULT_PREFERENCES, warning: null })
+        setState({ isLoading: false, mode: provider.mode, preferences: normalizePreferences(stored), warning: null })
       } catch {
         const fallback = new InMemoryStorageProvider()
         await fallback.initialize()
@@ -51,8 +52,8 @@ export function useAppPreferences() {
     return () => { isActive = false }
   }, [])
 
-  const updatePreferences = useCallback(async (updates: Partial<Pick<AppPreferences, 'compactSidebar' | 'lastSection'>>) => {
-    const nextPreferences = { ...state.preferences, ...updates }
+  const updatePreferences = useCallback(async (updates: Partial<Pick<AppPreferences, 'aiApiBaseUrl' | 'compactSidebar' | 'lastSection'>>) => {
+    const nextPreferences = { ...state.preferences, ...updates, schemaVersion: 2 as const }
     setState((current) => ({ ...current, preferences: nextPreferences }))
 
     try {
@@ -64,6 +65,26 @@ export function useAppPreferences() {
 
   const setCompactSidebar = useCallback((compactSidebar: boolean) => updatePreferences({ compactSidebar }), [updatePreferences])
   const setLastSection = useCallback((lastSection: NavigationItem) => updatePreferences({ lastSection }), [updatePreferences])
+  const setAiApiBaseUrl = useCallback((aiApiBaseUrl: string) => updatePreferences({ aiApiBaseUrl: aiApiBaseUrl.trim() }), [updatePreferences])
 
-  return { ...state, setCompactSidebar, setLastSection }
+  return { ...state, setAiApiBaseUrl, setCompactSidebar, setLastSection }
+}
+
+function normalizePreferences(stored: AppPreferences | null): AppPreferences {
+  if (!stored) return DEFAULT_PREFERENCES
+  return {
+    schemaVersion: 2,
+    compactSidebar: Boolean(stored.compactSidebar),
+    lastSection: stored.lastSection || 'Inicio',
+    aiApiBaseUrl: typeof stored.aiApiBaseUrl === 'string' ? stored.aiApiBaseUrl : DEFAULT_PREFERENCES.aiApiBaseUrl,
+  }
+}
+
+function getDefaultAIBaseUrl() {
+  const configuredUrl = import.meta.env.VITE_AI_API_BASE_URL?.trim()
+  if (configuredUrl) return configuredUrl
+  if (typeof window !== 'undefined' && /^https?:$/.test(window.location.protocol) && !['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+    return window.location.origin
+  }
+  return ''
 }

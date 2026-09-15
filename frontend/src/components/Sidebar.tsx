@@ -1,5 +1,7 @@
 import { BarChart3, Bot, Building2, Gauge, LayoutDashboard, Settings, SlidersHorizontal, Target, X, type LucideIcon } from 'lucide-react'
 import type { NavigationItem } from '../App'
+import type { AIAvailability } from '../services/aiService'
+import { AIStatusBadge } from './AIStatusBadge'
 import { BrandMark } from './BrandMark'
 
 interface SidebarProps {
@@ -8,6 +10,7 @@ interface SidebarProps {
   isOpen: boolean
   onClose: () => void
   onNavigate: (item: NavigationItem) => void
+  aiStatus: AIAvailability
 }
 
 const navigation: Array<{ label: NavigationItem; icon: LucideIcon }> = [
@@ -21,7 +24,7 @@ const navigation: Array<{ label: NavigationItem; icon: LucideIcon }> = [
   { label: 'Configuración', icon: Settings },
 ]
 
-export function Sidebar({ activeItem, compact, isOpen, onClose, onNavigate }: SidebarProps) {
+export function Sidebar({ activeItem, aiStatus, compact, isOpen, onClose, onNavigate }: SidebarProps) {
   const handleNavigate = (item: NavigationItem) => {
     onNavigate(item)
     onClose()
@@ -48,9 +51,9 @@ export function Sidebar({ activeItem, compact, isOpen, onClose, onNavigate }: Si
             )
           })}
         </nav>
-        <div className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${compact ? 'lg:p-3' : ''}`} title={compact ? 'IA: No configurada' : undefined}>
-          <div className={`flex items-center gap-2 text-xs font-semibold text-slate-300 ${compact ? 'lg:justify-center' : ''}`}><span className="size-2 shrink-0 rounded-full bg-slate-500" /><span className={compact ? 'lg:sr-only' : ''}>IA: No configurada</span></div>
-          <p className={`mt-2 text-xs leading-5 text-slate-500 ${compact ? 'lg:sr-only' : ''}`}>La integración segura se habilitará en una fase posterior.</p>
+        <div className={`rounded-2xl border border-white/10 bg-white/[0.04] p-3 ${compact ? 'lg:flex lg:justify-center' : ''}`}>
+          <AIStatusBadge compact={compact} status={aiStatus} />
+          <p className={`mt-2 px-1 text-xs leading-5 text-slate-500 ${compact ? 'lg:sr-only' : ''}`}>Gemini opera mediante un backend seguro y nunca recibe la clave desde esta aplicación.</p>
         </div>
       </aside>
     </>

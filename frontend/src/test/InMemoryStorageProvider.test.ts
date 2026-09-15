@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { InMemoryStorageProvider } from '../storage/InMemoryStorageProvider'
-import type { AppPreferences, Organization, StrategicPlan } from '../types/models'
+import type { AIInteraction, AppPreferences, Organization, StrategicPlan } from '../types/models'
 
 describe('InMemoryStorageProvider', () => {
   it('guarda y devuelve una copia de las preferencias', async () => {
     const provider = new InMemoryStorageProvider()
-    const preferences: AppPreferences = { schemaVersion: 1, compactSidebar: true, lastSection: 'Configuración' }
+    const preferences: AppPreferences = { schemaVersion: 2, compactSidebar: true, lastSection: 'Configuración', aiApiBaseUrl: '' }
 
     await provider.initialize()
     expect(await provider.getAppPreferences()).toBeNull()
@@ -46,18 +46,27 @@ describe('InMemoryStorageProvider', () => {
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     }
+    const interaction: AIInteraction = {
+      id: 'ai-1', organizationId: organization.id, planId: plan.id, module: 'STRATEGIC_ANALYSIS', action: 'GENERATE_ANALYSIS',
+      prompt: '{}', response: '{}', model: 'gemini-2.5-flash', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
+      status: 'AI_PROPOSED', approvedByUser: false, userEdited: false,
+      finalContent: { executiveSummary: 'Resumen', strengths: ['Oferta'], risks: ['Concentración'], priorities: ['Diversificar'], confidence: 0.8 },
+    }
 
     await provider.initialize()
     await provider.saveOrganization(organization)
     await provider.savePlan(plan)
+    await provider.saveAIInteraction(interaction)
 
     const storedOrganizations = await provider.getOrganizations()
     expect(storedOrganizations).toEqual([organization])
     expect(storedOrganizations[0]).not.toBe(organization)
     expect(await provider.getPlans()).toEqual([plan])
+    expect(await provider.getAIInteractions()).toEqual([interaction])
 
     await provider.deleteOrganization(organization.id)
     expect(await provider.getOrganizations()).toEqual([])
     expect(await provider.getPlans()).toEqual([])
+    expect(await provider.getAIInteractions()).toEqual([])
   })
 })

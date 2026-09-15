@@ -12,9 +12,9 @@ Construir una aplicación ejecutiva que conecte organizaciones, planes, objetivo
 - **Visualización:** Recharts o Chart.js, cuando se incorporen indicadores reales.
 - **Aplicación Windows:** prototipo portable validado con Electron.
 - **Persistencia local:** abstracción común con IndexedDB; SQLite queda reservado para una fase posterior si el alcance lo requiere.
-- **IA:** API propia desplegable en Vercel que protegerá la clave de Gemini. El frontend nunca contendrá secretos.
+- **IA:** API propia desplegable en Vercel que protege la clave de Gemini, valida respuestas estructuradas y mantiene cada propuesta bajo decisión humana.
 
-Hasta la Fase 3 hay frontend, persistencia local, organizaciones, planes y entregables ejecutables; todavía no hay backend ni conexión con Gemini.
+Hasta la Fase 4 hay frontend, persistencia local, organizaciones, planes, backend seguro para Gemini, control humano de propuestas y bitácora de IA. La conexión real se habilita al desplegar el backend y configurar la clave privada en Vercel.
 
 ## Estructura actual
 
@@ -23,6 +23,7 @@ Hasta la Fase 3 hay frontend, persistencia local, organizaciones, planes y entre
 ├── docs/
 │   └── evidencias/       # Registro verificable de cada fase
 ├── desktop/              # Contenedor Electron para Windows
+├── api/                  # Funciones seguras de IA para Vercel
 ├── frontend/
 │   ├── public/           # Recursos estáticos
 │   └── src/
@@ -35,6 +36,7 @@ Hasta la Fase 3 hay frontend, persistencia local, organizaciones, planes y entre
 │       ├── test/         # Configuración y pruebas
 │       └── types/        # Modelos TypeScript iniciales
 ├── scripts/              # Construcción y verificación de entregables
+├── vercel.json           # Build web y configuración de funciones
 ├── .env.example          # Nombres de variables, nunca secretos
 ├── .gitignore
 └── package.json          # Comandos del proyecto
@@ -69,7 +71,7 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 | 1 | Shell visual y almacenamiento mínimo | Completada |
 | 2 | Prototipo HTML local y prototipo EXE | Completada con observación |
 | 3 | Organizaciones y planes | Completada |
-| 4 | Integración Gemini y backend Vercel | Pendiente |
+| 4 | Integración Gemini y backend Vercel | Completada con configuración externa pendiente |
 | 5 | Planeamiento estratégico | Pendiente |
 | 6 | Balanced Scorecard | Pendiente |
 | 7 | Iniciativas y Gantt | Pendiente |
@@ -82,9 +84,24 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 
 ## Estado actual
 
-**Fase 3 — Organizaciones y planes:** la aplicación permite crear, consultar, editar y eliminar múltiples organizaciones, además de administrar varios planes estratégicos vinculados por periodo y estado. Los datos permanecen en IndexedDB local y el Inicio muestra conteos reales.
+**Fase 4 — Integración Gemini y backend Vercel:** el módulo IA permite configurar la URL del backend, verificar su estado, solicitar un análisis estratégico estructurado y aprobar, editar o rechazar la propuesta. La clave permanece únicamente en Vercel y la bitácora se conserva en IndexedDB local.
 
-Consulte [docs/evidencias/FASE_03.md](docs/evidencias/FASE_03.md) para ver las decisiones, pruebas y modo de uso de esta entrega.
+Consulte [docs/evidencias/FASE_04.md](docs/evidencias/FASE_04.md) para ver las decisiones y pruebas, y [docs/manual/CONFIGURACION_GEMINI.md](docs/manual/CONFIGURACION_GEMINI.md) para habilitar la conexión real sin exponer secretos.
+
+## Backend Gemini
+
+El endpoint disponible es `GET/POST /api/ai/strategic-analysis`. `GET` informa si el proveedor está configurado y `POST` recibe una organización, un plan vinculado y un enfoque opcional. La respuesta se limita a un esquema JSON validado.
+
+Variables privadas del backend:
+
+```text
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
+AI_ALLOWED_ORIGINS=http://localhost:4173,http://127.0.0.1:4173
+AI_ALLOW_LOCAL_APP=false
+```
+
+Nunca utilice el prefijo `VITE_` para la clave. La única variable pública opcional es `VITE_AI_API_BASE_URL`, que contiene la URL de Vercel y no un secreto.
 
 ## Generar HTML y aplicación Windows
 

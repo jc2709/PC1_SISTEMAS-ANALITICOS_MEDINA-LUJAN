@@ -1,4 +1,4 @@
-import type { AppPreferences, Organization, StrategicPlan } from '../types/models'
+import type { AIInteraction, AppPreferences, Organization, StrategicPlan } from '../types/models'
 import type { StorageProvider } from './StorageProvider'
 
 export class InMemoryStorageProvider implements StorageProvider {
@@ -6,6 +6,7 @@ export class InMemoryStorageProvider implements StorageProvider {
   private preferences: AppPreferences | null = null
   private organizations = new Map<string, Organization>()
   private plans = new Map<string, StrategicPlan>()
+  private aiInteractions = new Map<string, AIInteraction>()
 
   async initialize() {
     return Promise.resolve()
@@ -32,6 +33,9 @@ export class InMemoryStorageProvider implements StorageProvider {
     for (const [planId, plan] of this.plans) {
       if (plan.organizationId === id) this.plans.delete(planId)
     }
+    for (const [interactionId, interaction] of this.aiInteractions) {
+      if (interaction.organizationId === id) this.aiInteractions.delete(interactionId)
+    }
   }
 
   async getPlans() {
@@ -44,6 +48,17 @@ export class InMemoryStorageProvider implements StorageProvider {
 
   async deletePlan(id: StrategicPlan['id']) {
     this.plans.delete(id)
+    for (const [interactionId, interaction] of this.aiInteractions) {
+      if (interaction.planId === id) this.aiInteractions.delete(interactionId)
+    }
+  }
+
+  async getAIInteractions() {
+    return Array.from(this.aiInteractions.values(), cloneAIInteraction)
+  }
+
+  async saveAIInteraction(interaction: AIInteraction) {
+    this.aiInteractions.set(interaction.id, cloneAIInteraction(interaction))
   }
 }
 
@@ -55,5 +70,17 @@ function cloneOrganization(organization: Organization): Organization {
     markets: [...organization.markets],
     competitors: [...organization.competitors],
     principles: [...organization.principles],
+  }
+}
+
+function cloneAIInteraction(interaction: AIInteraction): AIInteraction {
+  return {
+    ...interaction,
+    finalContent: interaction.finalContent ? {
+      ...interaction.finalContent,
+      strengths: [...interaction.finalContent.strengths],
+      risks: [...interaction.finalContent.risks],
+      priorities: [...interaction.finalContent.priorities],
+    } : null,
   }
 }

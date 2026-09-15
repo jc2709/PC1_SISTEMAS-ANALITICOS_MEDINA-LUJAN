@@ -2,20 +2,22 @@ import { Bell, Menu, Search } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import type { NavigationItem } from '../App'
 import { Sidebar } from '../components/Sidebar'
+import type { AIAvailability } from '../services/aiService'
 
 interface AppShellProps {
   activeItem: NavigationItem
   children: ReactNode
   compactSidebar: boolean
   onNavigate: (item: NavigationItem) => void
+  aiStatus: AIAvailability
 }
 
-export function AppShell({ activeItem, children, compactSidebar, onNavigate }: AppShellProps) {
+export function AppShell({ activeItem, aiStatus, children, compactSidebar, onNavigate }: AppShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-[#f4f7fa]">
-      <Sidebar activeItem={activeItem} compact={compactSidebar} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onNavigate={onNavigate} />
+      <Sidebar activeItem={activeItem} aiStatus={aiStatus} compact={compactSidebar} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onNavigate={onNavigate} />
       <div className={`transition-[padding] duration-300 ${compactSidebar ? 'lg:pl-20' : 'lg:pl-72'}`}>
         <header className="sticky top-0 z-20 flex h-20 items-center gap-4 border-b border-slate-200/80 bg-white/90 px-5 backdrop-blur-xl sm:px-8">
           <button aria-label="Abrir menú" className="rounded-xl border border-slate-200 p-2.5 text-slate-600 hover:bg-slate-50 lg:hidden" onClick={() => setIsSidebarOpen(true)} type="button">

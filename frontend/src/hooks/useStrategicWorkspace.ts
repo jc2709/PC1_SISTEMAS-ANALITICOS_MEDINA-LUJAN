@@ -3,13 +3,14 @@ import { buildOrganization, buildPlan } from '../services/workspaceService'
 import { createStorageProvider } from '../storage/createStorageProvider'
 import { InMemoryStorageProvider } from '../storage/InMemoryStorageProvider'
 import type { StorageMode, StorageProvider } from '../storage/StorageProvider'
-import type { Organization, OrganizationInput, StrategicPlan, StrategicPlanInput } from '../types/models'
+import type { AIInteraction, Organization, OrganizationInput, StrategicPlan, StrategicPlanInput } from '../types/models'
 
 interface WorkspaceState {
   isLoading: boolean
   mode: StorageMode
   organizations: Organization[]
   plans: StrategicPlan[]
+  aiInteractions: AIInteraction[]
   warning: string | null
 }
 
@@ -20,6 +21,7 @@ export function useStrategicWorkspace() {
     mode: typeof indexedDB === 'undefined' ? 'memory' : 'indexed-db',
     organizations: [],
     plans: [],
+    aiInteractions: [],
     warning: null,
   })
 
@@ -36,13 +38,18 @@ export function useStrategicWorkspace() {
       }
 
       providerRef.current = provider
-      const [organizations, plans] = await Promise.all([provider.getOrganizations(), provider.getPlans()])
+      const [organizations, plans, aiInteractions] = await Promise.all([
+        provider.getOrganizations(),
+        provider.getPlans(),
+        provider.getAIInteractions(),
+      ])
       if (!isActive) return
       setState({
         isLoading: false,
         mode: provider.mode,
         organizations,
         plans,
+        aiInteractions,
         warning: provider.mode === 'memory' ? 'Las organizaciones y planes se conservarán solo durante esta sesión.' : null,
       })
     }
@@ -72,6 +79,7 @@ export function useStrategicWorkspace() {
       ...current,
       organizations: current.organizations.filter((organization) => organization.id !== id),
       plans: current.plans.filter((plan) => plan.organizationId !== id),
+      aiInteractions: current.aiInteractions.filter((interaction) => interaction.organizationId !== id),
     }))
   }, [])
 
@@ -89,8 +97,23 @@ export function useStrategicWorkspace() {
 
   const deletePlan = useCallback(async (id: StrategicPlan['id']) => {
     await providerRef.current?.deletePlan(id)
-    setState((current) => ({ ...current, plans: current.plans.filter((plan) => plan.id !== id) }))
+    setState((current) => ({
+      ...current,
+      plans: current.plans.filter((plan) => plan.id !== id),
+      aiInteractions: current.aiInteractions.filter((interaction) => interaction.planId !== id),
+    }))
   }, [])
 
-  return { ...state, deleteOrganization, deletePlan, saveOrganization, savePlan }
+  const saveAIInteraction = useCallback(async (interaction: AIInteraction) => {
+    await providerRef.current?.saveAIInteraction(interaction)
+    setState((current) => ({
+      ...current,
+      aiInteractions: current.aiInteractions.some((item) => item.id === interaction.id)
+        ? current.aiInteractions.map((item) => item.id === interaction.id ? interaction : item)
+        : [interaction, ...current.aiInteractions],
+    }))
+    return interaction
+  }, [])
+
+  return { ...state, deleteOrganization, deletePlan, saveAIInteraction, saveOrganization, savePlan }
 }

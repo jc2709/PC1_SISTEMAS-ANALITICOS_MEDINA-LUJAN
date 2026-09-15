@@ -2,6 +2,8 @@ import { BarChart3, Building2, ClipboardList, Flag, Sparkles, Target } from 'luc
 import type { NavigationItem } from '../App'
 import { StatCard } from '../components/StatCard'
 import { StorageBadge } from '../components/StorageBadge'
+import { AIStatusBadge } from '../components/AIStatusBadge'
+import type { AIAvailability } from '../services/aiService'
 import type { StorageMode } from '../storage/StorageProvider'
 
 interface HomePageProps {
@@ -9,9 +11,10 @@ interface HomePageProps {
   planCount: number
   selectedSection: NavigationItem
   storageMode: StorageMode
+  aiStatus: AIAvailability
 }
 
-export function HomePage({ organizationCount, planCount, selectedSection, storageMode }: HomePageProps) {
+export function HomePage({ aiStatus, organizationCount, planCount, selectedSection, storageMode }: HomePageProps) {
   const isFutureSection = selectedSection !== 'Inicio'
   const stats = [
     { label: 'Organizaciones', icon: Building2, description: 'Entidades registradas', accent: 'bg-cyan-brand', value: organizationCount },
@@ -31,7 +34,7 @@ export function HomePage({ organizationCount, planCount, selectedSection, storag
         </div>
         <div className="flex flex-wrap gap-2">
           <StorageBadge mode={storageMode} />
-          <div className="flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-500 shadow-sm"><span className="size-2 rounded-full bg-slate-400" />IA: No configurada</div>
+          <AIStatusBadge status={aiStatus} />
         </div>
       </div>
 
@@ -56,9 +59,9 @@ export function HomePage({ organizationCount, planCount, selectedSection, storag
         <article className="relative min-h-72 overflow-hidden rounded-3xl bg-navy-900 p-7 text-white shadow-[0_18px_50px_rgba(7,20,38,0.18)] sm:p-9">
           <div className="absolute -right-20 -top-28 size-80 rounded-full border-[54px] border-cyan-brand/10" />
           <div className="relative max-w-xl">
-            <span className="inline-flex rounded-full bg-cyan-brand/15 px-3 py-1.5 text-xs font-bold text-cyan-300 ring-1 ring-cyan-brand/20">FASE 3 · ORGANIZACIONES Y PLANES</span>
-            <h2 className="mt-5 text-2xl font-bold tracking-tight sm:text-3xl">Construye un portafolio estratégico para múltiples organizaciones.</h2>
-            <p className="mt-4 text-sm leading-6 text-slate-300">Registra el contexto de cada entidad y crea sus planes por periodo. La información permanece local en este dispositivo.</p>
+            <span className="inline-flex rounded-full bg-cyan-brand/15 px-3 py-1.5 text-xs font-bold text-cyan-300 ring-1 ring-cyan-brand/20">FASE 4 · INTEGRACIÓN GEMINI</span>
+            <h2 className="mt-5 text-2xl font-bold tracking-tight sm:text-3xl">Convierte el contexto registrado en propuestas estratégicas revisables.</h2>
+            <p className="mt-4 text-sm leading-6 text-slate-300">Gemini se conecta mediante una API segura. Cada propuesta queda bajo control humano y se registra localmente.</p>
           </div>
         </article>
         <article className="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-[0_8px_28px_rgba(15,23,42,0.05)]">
@@ -69,6 +72,7 @@ export function HomePage({ organizationCount, planCount, selectedSection, storag
               ['Interfaz principal', 'Disponible'],
               ['Organizaciones y planes', 'Disponible'],
               ['Persistencia local', 'Disponible'],
+              ['Copiloto y bitácora IA', 'Disponible'],
             ].map(([label, status]) => (
               <div className="flex items-center justify-between gap-4" key={label}>
                 <span className="text-sm font-medium text-slate-500">{label}</span>

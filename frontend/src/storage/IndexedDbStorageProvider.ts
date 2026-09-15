@@ -1,11 +1,12 @@
-import type { AppPreferences, Organization, StrategicPlan } from '../types/models'
+import type { AIInteraction, AppPreferences, Organization, StrategicPlan } from '../types/models'
 import type { StorageProvider } from './StorageProvider'
 
 const DATABASE_NAME = 'gestion-control-estrategico-ia'
-const DATABASE_VERSION = 2
+const DATABASE_VERSION = 3
 const SETTINGS_STORE = 'settings'
 const ORGANIZATIONS_STORE = 'organizations'
 const PLANS_STORE = 'plans'
+const AI_INTERACTIONS_STORE = 'aiInteractions'
 const PREFERENCES_KEY = 'app-preferences'
 
 function requestToPromise<T>(request: IDBRequest<T>) {
@@ -43,6 +44,11 @@ export class IndexedDbStorageProvider implements StorageProvider {
         const plansStore = database.createObjectStore(PLANS_STORE, { keyPath: 'id' })
         plansStore.createIndex('organizationId', 'organizationId', { unique: false })
       }
+      if (!database.objectStoreNames.contains(AI_INTERACTIONS_STORE)) {
+        const interactionsStore = database.createObjectStore(AI_INTERACTIONS_STORE, { keyPath: 'id' })
+        interactionsStore.createIndex('organizationId', 'organizationId', { unique: false })
+        interactionsStore.createIndex('planId', 'planId', { unique: false })
+      }
     })
 
     this.database = await requestToPromise(request)
@@ -71,7 +77,7 @@ export class IndexedDbStorageProvider implements StorageProvider {
   }
 
   async deleteOrganization(id: Organization['id']) {
-    const transaction = this.getTransaction([ORGANIZATIONS_STORE, PLANS_STORE], 'readwrite')
+    const transaction = this.getTransaction([ORGANIZATIONS_STORE, PLANS_STORE, AI_INTERACTIONS_STORE], 'readwrite')
     transaction.objectStore(ORGANIZATIONS_STORE).delete(id)
 
     const plansIndex = transaction.objectStore(PLANS_STORE).index('organizationId')
@@ -82,6 +88,7 @@ export class IndexedDbStorageProvider implements StorageProvider {
       transaction.objectStore(PLANS_STORE).delete(cursor.primaryKey)
       cursor.continue()
     })
+    this.deleteByIndex(transaction.objectStore(AI_INTERACTIONS_STORE).index('organizationId'), id)
     await transactionToPromise(transaction)
   }
 
@@ -96,9 +103,30 @@ export class IndexedDbStorageProvider implements StorageProvider {
   }
 
   async deletePlan(id: StrategicPlan['id']) {
-    const transaction = this.getTransaction(PLANS_STORE, 'readwrite')
+    const transaction = this.getTransaction([PLANS_STORE, AI_INTERACTIONS_STORE], 'readwrite')
     transaction.objectStore(PLANS_STORE).delete(id)
+    this.deleteByIndex(transaction.objectStore(AI_INTERACTIONS_STORE).index('planId'), id)
     await transactionToPromise(transaction)
+  }
+
+  async getAIInteractions() {
+    return requestToPromise(this.getStore(AI_INTERACTIONS_STORE, 'readonly').getAll()) as Promise<AIInteraction[]>
+  }
+
+  async saveAIInteraction(interaction: AIInteraction) {
+    const transaction = this.getTransaction(AI_INTERACTIONS_STORE, 'readwrite')
+    transaction.objectStore(AI_INTERACTIONS_STORE).put(interaction)
+    await transactionToPromise(transaction)
+  }
+
+  private deleteByIndex(index: IDBIndex, value: string) {
+    const cursorRequest = index.openKeyCursor(IDBKeyRange.only(value))
+    cursorRequest.addEventListener('success', () => {
+      const cursor = cursorRequest.result
+      if (!cursor) return
+      index.objectStore.delete(cursor.primaryKey)
+      cursor.continue()
+    })
   }
 
   private getStore(storeName: string, mode: IDBTransactionMode) {
