@@ -52,4 +52,19 @@ describe('strategic-analysis endpoint', () => {
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({ error: 'El plan no pertenece a la organización indicada.' })
   })
+
+  it('informa el estado seguro del proveedor sin exponer su respuesta ni la clave', async () => {
+    process.env[KEY_ENV_NAME] = 'unit-test-secret'
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"error":{"message":"provider detail"}}', { status: 404 })))
+
+    const response = await handler.fetch(new Request('https://example.vercel.app/api/ai/strategic-analysis', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(validRequest),
+    }))
+    const payload = await response.json()
+
+    expect(response.status).toBe(502)
+    expect(payload).toEqual({ error: 'El modelo configurado no está disponible para esta clave de Gemini.', upstreamStatus: 404 })
+    expect(JSON.stringify(payload)).not.toContain('provider detail')
+    expect(JSON.stringify(payload)).not.toContain('unit-test-secret')
+  })
 })

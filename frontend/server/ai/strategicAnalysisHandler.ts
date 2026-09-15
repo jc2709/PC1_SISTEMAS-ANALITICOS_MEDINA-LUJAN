@@ -51,7 +51,9 @@ export default {
       } catch {
         return json({ error: 'Gemini devolvió una respuesta ilegible. Puedes reintentar.' }, 502, cors.headers)
       }
-      if (!geminiResponse.ok) return json({ error: mapGeminiError(geminiResponse.status) }, 502, cors.headers)
+      if (!geminiResponse.ok) {
+        return json({ error: mapGeminiError(geminiResponse.status), upstreamStatus: geminiResponse.status }, 502, cors.headers)
+      }
       let analysisPayload: unknown
       try {
         analysisPayload = JSON.parse(extractGeminiText(geminiPayload)) as unknown
@@ -99,6 +101,7 @@ function json(value: unknown, status: number, headers: Record<string, string>) {
 function mapGeminiError(status: number) {
   if (status === 400) return 'Gemini rechazó la solicitud. Revisa el modelo configurado.'
   if (status === 401 || status === 403) return 'La clave de Gemini no es válida o no tiene permisos.'
+  if (status === 404) return 'El modelo configurado no está disponible para esta clave de Gemini.'
   if (status === 429) return 'Gemini alcanzó temporalmente su límite de solicitudes.'
   return 'Gemini no está disponible temporalmente.'
 }
