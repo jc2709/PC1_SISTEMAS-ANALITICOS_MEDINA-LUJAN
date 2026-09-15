@@ -1,6 +1,7 @@
 import { buildStrategicAnalysisPrompt, extractGeminiText, parseGeminiAnalysis, parseStrategicAnalysisInput, STRATEGIC_ANALYSIS_SCHEMA } from './strategicAnalysis.js'
 
 const DEFAULT_MODEL = 'gemini-2.5-flash'
+const FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash-lite']
 const MAX_REQUEST_BYTES = 30_000
 
 export const config = { maxDuration: 60 }
@@ -31,20 +32,22 @@ export default {
       }
       const input = parseStrategicAnalysisInput(requestPayload)
       const prompt = buildStrategicAnalysisPrompt(input)
-      const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 2_048,
-            responseMimeType: 'application/json',
-            responseJsonSchema: STRATEGIC_ANALYSIS_SCHEMA,
-          },
-        }),
-        signal: AbortSignal.timeout(45_000),
+      const geminiBody = JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 2_048,
+          responseMimeType: 'application/json',
+          responseJsonSchema: STRATEGIC_ANALYSIS_SCHEMA,
+        },
       })
+      let activeModel = model
+      let geminiResponse = await requestGemini(activeModel, geminiBody)
+      for (const fallbackModel of FALLBACK_MODELS) {
+        if (geminiResponse.status !== 404 || fallbackModel === activeModel) continue
+        activeModel = fallbackModel
+        geminiResponse = await requestGemini(activeModel, geminiBody)
+      }
       let geminiPayload: unknown
       try {
         geminiPayload = await geminiResponse.json() as unknown
@@ -61,7 +64,7 @@ export default {
         return json({ error: 'Gemini devolvió JSON inválido. Puedes reintentar.' }, 502, cors.headers)
       }
       const analysis = parseGeminiAnalysis(analysisPayload)
-      return json({ analysis, model, promptVersion: 'strategic-analysis-v1' }, 200, cors.headers)
+      return json({ analysis, model: activeModel, promptVersion: 'strategic-analysis-v1' }, 200, cors.headers)
     } catch (error) {
       if (error instanceof DOMException && error.name === 'TimeoutError') return json({ error: 'Gemini superó el tiempo máximo de respuesta.' }, 504, cors.headers)
       const message = error instanceof Error ? error.message : 'No se pudo completar el análisis.'
@@ -69,6 +72,15 @@ export default {
       return json({ error: isInputError ? message : 'Gemini devolvió una respuesta inválida. Puedes reintentar.' }, isInputError ? 400 : 502, cors.headers)
     }
   },
+}
+
+function requestGemini(model: string, body: string) {
+  return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY ?? '' },
+    body,
+    signal: AbortSignal.timeout(45_000),
+  })
 }
 
 function getModel() {
