@@ -84,4 +84,22 @@ describe('strategic-analysis endpoint', () => {
     expect(await response.json()).toEqual({ analysis, model: 'gemini-flash-latest', promptVersion: 'strategic-analysis-v1' })
     expect(geminiFetch).toHaveBeenCalledTimes(2)
   })
+
+  it('avanza al modelo Lite cuando el alias principal responde temporalmente 503', async () => {
+    process.env[KEY_ENV_NAME] = 'unit-test-secret'
+    const analysis = { executiveSummary: 'Análisis Lite.', strengths: ['Oferta'], risks: ['Concentración'], priorities: ['Diversificar'], confidence: 0.7 }
+    const geminiFetch = vi.fn()
+      .mockResolvedValueOnce(new Response('{}', { status: 404 }))
+      .mockResolvedValueOnce(new Response('{}', { status: 503 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(analysis) }] } }] }), { status: 200 }))
+    vi.stubGlobal('fetch', geminiFetch)
+
+    const response = await handler.fetch(new Request('https://example.vercel.app/api/ai/strategic-analysis', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(validRequest),
+    }))
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ analysis, model: 'gemini-2.5-flash-lite', promptVersion: 'strategic-analysis-v1' })
+    expect(geminiFetch).toHaveBeenCalledTimes(3)
+  })
 })

@@ -44,7 +44,7 @@ export default {
       let activeModel = model
       let geminiResponse = await requestGemini(activeModel, geminiBody)
       for (const fallbackModel of FALLBACK_MODELS) {
-        if (geminiResponse.status !== 404 || fallbackModel === activeModel) continue
+        if (![404, 503].includes(geminiResponse.status) || fallbackModel === activeModel) continue
         activeModel = fallbackModel
         geminiResponse = await requestGemini(activeModel, geminiBody)
       }
