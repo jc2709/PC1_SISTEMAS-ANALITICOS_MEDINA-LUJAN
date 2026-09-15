@@ -18,6 +18,7 @@
     "prebuild:exe:unpacked": "npm run build:html",
     "build:exe:unpacked": "electron-builder --win --dir --x64",
     "verify:exe": "pwsh -NoProfile -File scripts/build-exe/verify.ps1",
+    "package:final": "pwsh -NoProfile -File scripts/package-final.ps1",
     "predesktop": "npm run build:html",
     "desktop": "electron .",
     "test": "npm run test:frontend && npm run test:api",

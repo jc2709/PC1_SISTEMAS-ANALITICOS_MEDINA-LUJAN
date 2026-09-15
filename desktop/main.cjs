@@ -69,6 +69,10 @@ function createWindow() {
         const organizationText = await waitForText('Directorio estratégico')
         document.querySelector('[aria-label="Planeamiento"]')?.click()
         const plansText = await waitForText('Portafolio de planes')
+        document.querySelector('[aria-label="Dashboard"]')?.click()
+        const dashboardText = await waitForText('Dashboard ejecutivo')
+        document.querySelector('[aria-label="Reportes"]')?.click()
+        const reportsText = await waitForText('Excel, PowerPoint y reportes')
         return {
           title: document.title,
           hasHeading: bodyText.includes('GESTIÓN Y CONTROL ESTRATÉGICO IA'),
@@ -76,6 +80,8 @@ function createWindow() {
           indexedDbReady,
           hasOrganizationsModule: organizationText.includes('Organizaciones'),
           hasPlansModule: plansText.includes('Planes estratégicos'),
+          hasDashboardModule: dashboardText.includes('Dashboard ejecutivo'),
+          hasReportsModule: reportsText.includes('Excel, PowerPoint y reportes'),
         }
       })()`)
       finishSmokeTest({ ok: Object.values(result).every(Boolean), ...result })

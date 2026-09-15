@@ -24,7 +24,7 @@ if ($unexpectedFiles) {
     throw "La carpeta de prueba aislada contiene archivos auxiliares: $($unexpectedFiles.Name -join ', ')"
 }
 
-$process = Start-Process -FilePath $executablePath -ArgumentList "--smoke-test=$resultPath" -PassThru
+$process = Start-Process -FilePath $executablePath -ArgumentList "--smoke-test=$resultPath" -PassThru -WindowStyle Hidden
 $deadline = (Get-Date).AddSeconds(90)
 while (-not (Test-Path -LiteralPath $resultPath) -and (Get-Date) -lt $deadline) {
     Start-Sleep -Milliseconds 250

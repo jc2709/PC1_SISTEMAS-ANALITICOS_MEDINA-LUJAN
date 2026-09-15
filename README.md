@@ -82,13 +82,13 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 | 10 | Copiloto y narrativa IA | Completada |
 | 11 | Excel, PPT y reportes | Completada |
 | 12 | Pruebas integrales | Completada |
-| 13 | Documentación y empaquetado final | Pendiente |
+| 13 | Documentación y empaquetado final | Completada |
 
 ## Estado actual
 
-**Fases 10–12 — Decisión, interoperabilidad y calidad:** el dashboard genera narrativa estructurada con control humano; Reportes importa una plantilla Excel validada y exporta XLSX, PPTX y PDF; la suite integral verifica el flujo completo y la seguridad de las API.
+**Fase 13 — Entrega final:** la distribución queda preparada como un EXE portátil de archivo único y un HTML autocontenido. El empaquetado conserva `win-unpacked` solo como respaldo técnico, prueba el EXE copiado sin archivos auxiliares y deja hashes SHA-256 para verificar la entrega.
 
-Consulte [docs/evidencias/FASES_10_12.md](docs/evidencias/FASES_10_12.md) para ver las decisiones y pruebas, y [docs/manual/CONFIGURACION_GEMINI.md](docs/manual/CONFIGURACION_GEMINI.md) para revisar la conexión sin exponer secretos.
+Consulte [docs/evidencias/FASES_10_12.md](docs/evidencias/FASES_10_12.md), [docs/evidencias/FASE_13.md](docs/evidencias/FASE_13.md), [docs/manual/CONFIGURACION_GEMINI.md](docs/manual/CONFIGURACION_GEMINI.md) y [docs/manual/ENTREGA_FINAL.md](docs/manual/ENTREGA_FINAL.md).
 
 ## Backend Gemini
 
@@ -111,10 +111,11 @@ Nunca utilice el prefijo `VITE_` para la clave. La única variable pública opci
 npm run build:html
 npm run build:exe
 npm run verify:exe
+npm run package:final
 ```
 
-- HTML autocontenido: `frontend/dist/index.html`.
-- Aplicación Windows principal: `release/exe/GestionControlEstrategicoIA.exe`.
+- HTML autocontenido de entrega: `release/final/GestionControlEstrategicoIA.html`.
+- Aplicación Windows portable de entrega: `release/final/GestionControlEstrategicoIA.exe`.
 - Respaldo técnico: `release/exe/win-unpacked/GestionControlEstrategicoIA.exe`.
 
-El EXE principal puede copiarse por sí solo a otra carpeta o PC. No requiere instalar Node.js, npm o Python. El respaldo `win-unpacked` no forma parte de la distribución principal.
+El EXE principal puede copiarse por sí solo a otra carpeta o PC. No requiere instalar Node.js, npm o Python. El respaldo `win-unpacked` no forma parte de la distribución principal. Revise `docs/manual/ENTREGA_FINAL.md` para validar la advertencia de Windows sin desactivar sus protecciones.
