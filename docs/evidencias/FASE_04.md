@@ -9,6 +9,7 @@ Preparar una conexión segura entre la aplicación local y Google Gemini mediant
 - Endpoint `GET/POST /api/ai/strategic-analysis` compatible con Vercel Functions.
 - Clave `GEMINI_API_KEY` leída exclusivamente en el servidor.
 - Modelo configurable mediante `GEMINI_MODEL`, con valor estable inicial `gemini-2.5-flash`.
+- Contingencia automática ante 404/503 mediante modelos estables y alias Flash disponibles, sin intervención del usuario.
 - Respuesta JSON estructurada con resumen, fortalezas, riesgos, prioridades y confianza.
 - Validación del input, pertenencia del plan, tamaño máximo y salida de Gemini.
 - Restricción CORS configurable para frontend web y aplicación local.
@@ -63,11 +64,12 @@ Sin un backend desplegado puedes abrir el módulo IA, consultar su estado, confi
 - Flujo de interfaz con backend simulado: configurar, generar y aprobar.
 - Persistencia y borrado en cascada de interacciones.
 - Build de HTML autocontenido para comprobar compatibilidad; no se regeneró el entregable final por acuerdo con el usuario.
-- 11 pruebas de frontend y 3 pruebas del endpoint aprobadas.
+- 11 pruebas de frontend y 6 pruebas del endpoint aprobadas.
 - Servidor local verificado con respuesta HTTP 200 y contenedor React presente.
 - Despliegue de producción `f5c780e` verificado en estado `Ready`.
 - `https://pc1-medina-lujan.vercel.app` verificado visualmente sin errores de consola.
 - `GET /api/ai/strategic-analysis` verificado con HTTP 200 y estado seguro `not_configured` sin exponer secretos.
+- Generación real verificada con HTTP 200 mediante el modelo de contingencia `gemini-3.6-flash`.
 
 ## Problemas y soluciones
 
@@ -75,6 +77,7 @@ Sin un backend desplegado puedes abrir el módulo IA, consultar su estado, confi
 - La actualización normal del lockfile quedó esperando red. Se interrumpió sin cambios parciales y se actualizó en modo offline, ya que no se añadieron paquetes.
 - El lint detectó una actualización inmediata de estado dentro de un efecto. La comprobación automática ahora actualiza el estado únicamente al resolver la solicitud asíncrona.
 - Vercel fallaba porque el lockfile generado en Windows omitía el binario opcional `@tailwindcss/oxide-linux-x64-gnu`. Se declaró explícitamente como dependencia opcional, junto con `lightningcss-linux-x64-gnu`, y el siguiente despliegue quedó `Ready`.
+- La clave configurada no tenía disponible `gemini-2.5-flash` (404) y el alias inicial respondió 503. El backend ahora recorre una cadena controlada de modelos y registra en la respuesta cuál atendió la solicitud.
 
 ## Decisiones técnicas
 
