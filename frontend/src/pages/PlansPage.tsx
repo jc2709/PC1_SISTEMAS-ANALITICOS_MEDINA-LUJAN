@@ -1,4 +1,4 @@
-import { CalendarRange, CheckCircle2, ClipboardList, Edit3, Plus, Trash2 } from 'lucide-react'
+import { CalendarRange, CheckCircle2, ClipboardList, Edit3, FilePenLine, Plus, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { EmptyState } from '../components/EmptyState'
@@ -11,6 +11,7 @@ interface PlansPageProps {
   isLoading: boolean
   mode: StorageMode
   onDelete: (id: StrategicPlan['id']) => Promise<void>
+  onOpenPlanning: (plan: StrategicPlan) => void
   onRequestOrganization: () => void
   onSave: (input: StrategicPlanInput, existing?: StrategicPlan) => Promise<StrategicPlan>
   organizations: Organization[]
@@ -21,7 +22,7 @@ interface PlansPageProps {
 const STATUS_LABELS: Record<StrategicPlanStatus, string> = { DRAFT: 'Borrador', ACTIVE: 'Activo', ARCHIVED: 'Archivado' }
 const STATUS_STYLES: Record<StrategicPlanStatus, string> = { DRAFT: 'bg-amber-50 text-amber-700', ACTIVE: 'bg-emerald-50 text-emerald-700', ARCHIVED: 'bg-slate-100 text-slate-600' }
 
-export function PlansPage({ isLoading, mode, onDelete, onRequestOrganization, onSave, organizations, plans, warning }: PlansPageProps) {
+export function PlansPage({ isLoading, mode, onDelete, onOpenPlanning, onRequestOrganization, onSave, organizations, plans, warning }: PlansPageProps) {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingPlan, setEditingPlan] = useState<StrategicPlan | undefined>()
   const [deleteTarget, setDeleteTarget] = useState<StrategicPlan | null>(null)
@@ -121,7 +122,7 @@ export function PlansPage({ isLoading, mode, onDelete, onRequestOrganization, on
                       <td className="px-6 py-5 text-sm font-medium text-slate-600">{organizationMap.get(plan.organizationId) ?? 'Organización no disponible'}</td>
                       <td className="px-6 py-5 text-sm font-bold text-slate-700">{plan.startYear}–{plan.endYear}</td>
                       <td className="px-6 py-5"><span className={`rounded-full px-3 py-1.5 text-xs font-bold ${STATUS_STYLES[plan.status]}`}>{STATUS_LABELS[plan.status]}</span></td>
-                      <td className="px-6 py-5"><div className="flex justify-end gap-1"><button aria-label={`Editar ${plan.name}`} className="grid size-9 place-items-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700" onClick={() => openEditForm(plan)} type="button"><Edit3 className="size-4" aria-hidden="true" /></button><button aria-label={`Eliminar ${plan.name}`} className="grid size-9 place-items-center rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-600" onClick={() => setDeleteTarget(plan)} type="button"><Trash2 className="size-4" aria-hidden="true" /></button></div></td>
+                      <td className="px-6 py-5"><div className="flex justify-end gap-1"><button aria-label={`Abrir planeamiento de ${plan.name}`} className="inline-flex items-center gap-2 rounded-xl bg-cyan-soft px-3 py-2 text-xs font-bold text-cyan-800 hover:bg-cyan-100" onClick={() => onOpenPlanning(plan)} type="button"><FilePenLine className="size-4" aria-hidden="true" />Formular</button><button aria-label={`Editar ${plan.name}`} className="grid size-9 place-items-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700" onClick={() => openEditForm(plan)} type="button"><Edit3 className="size-4" aria-hidden="true" /></button><button aria-label={`Eliminar ${plan.name}`} className="grid size-9 place-items-center rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-600" onClick={() => setDeleteTarget(plan)} type="button"><Trash2 className="size-4" aria-hidden="true" /></button></div></td>
                     </tr>
                   ))}
                 </tbody>

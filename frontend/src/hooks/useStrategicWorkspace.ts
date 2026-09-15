@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { buildOrganization, buildPlan } from '../services/workspaceService'
+import { buildStrategicPlanning, validateStrategicPlanning } from '../services/planningService'
 import { createStorageProvider } from '../storage/createStorageProvider'
 import { InMemoryStorageProvider } from '../storage/InMemoryStorageProvider'
 import type { StorageMode, StorageProvider } from '../storage/StorageProvider'
-import type { AIInteraction, Organization, OrganizationInput, StrategicPlan, StrategicPlanInput } from '../types/models'
+import type { AIInteraction, Organization, OrganizationInput, StrategicPlan, StrategicPlanInput, StrategicPlanning, StrategicPlanningInput } from '../types/models'
 
 interface WorkspaceState {
   isLoading: boolean
@@ -11,6 +12,7 @@ interface WorkspaceState {
   organizations: Organization[]
   plans: StrategicPlan[]
   aiInteractions: AIInteraction[]
+  strategicPlannings: StrategicPlanning[]
   warning: string | null
 }
 
@@ -22,6 +24,7 @@ export function useStrategicWorkspace() {
     organizations: [],
     plans: [],
     aiInteractions: [],
+    strategicPlannings: [],
     warning: null,
   })
 
@@ -38,10 +41,11 @@ export function useStrategicWorkspace() {
       }
 
       providerRef.current = provider
-      const [organizations, plans, aiInteractions] = await Promise.all([
+      const [organizations, plans, aiInteractions, strategicPlannings] = await Promise.all([
         provider.getOrganizations(),
         provider.getPlans(),
         provider.getAIInteractions(),
+        provider.getStrategicPlannings(),
       ])
       if (!isActive) return
       setState({
@@ -50,7 +54,8 @@ export function useStrategicWorkspace() {
         organizations,
         plans,
         aiInteractions,
-        warning: provider.mode === 'memory' ? 'Las organizaciones y planes se conservarán solo durante esta sesión.' : null,
+        strategicPlannings,
+        warning: provider.mode === 'memory' ? 'Las organizaciones, planes y su contenido estratégico se conservarán solo durante esta sesión.' : null,
       })
     }
 
@@ -80,6 +85,7 @@ export function useStrategicWorkspace() {
       organizations: current.organizations.filter((organization) => organization.id !== id),
       plans: current.plans.filter((plan) => plan.organizationId !== id),
       aiInteractions: current.aiInteractions.filter((interaction) => interaction.organizationId !== id),
+      strategicPlannings: current.strategicPlannings.filter((planning) => planning.organizationId !== id),
     }))
   }, [])
 
@@ -101,6 +107,7 @@ export function useStrategicWorkspace() {
       ...current,
       plans: current.plans.filter((plan) => plan.id !== id),
       aiInteractions: current.aiInteractions.filter((interaction) => interaction.planId !== id),
+      strategicPlannings: current.strategicPlannings.filter((planning) => planning.planId !== id),
     }))
   }, [])
 
@@ -115,5 +122,19 @@ export function useStrategicWorkspace() {
     return interaction
   }, [])
 
-  return { ...state, deleteOrganization, deletePlan, saveAIInteraction, saveOrganization, savePlan }
+  const saveStrategicPlanning = useCallback(async (input: StrategicPlanningInput, existing?: StrategicPlanning) => {
+    const errors = validateStrategicPlanning(input)
+    if (Object.keys(errors).length > 0) throw new Error(Object.values(errors)[0])
+    const planning = buildStrategicPlanning(input, existing)
+    await providerRef.current?.saveStrategicPlanning(planning)
+    setState((current) => ({
+      ...current,
+      strategicPlannings: current.strategicPlannings.some((item) => item.id === planning.id)
+        ? current.strategicPlannings.map((item) => item.id === planning.id ? planning : item)
+        : [...current.strategicPlannings, planning],
+    }))
+    return planning
+  }, [])
+
+  return { ...state, deleteOrganization, deletePlan, saveAIInteraction, saveOrganization, savePlan, saveStrategicPlanning }
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { InMemoryStorageProvider } from '../storage/InMemoryStorageProvider'
+import { buildStrategicPlanning, createEmptyPlanning } from '../services/planningService'
 import type { AIInteraction, AppPreferences, Organization, StrategicPlan } from '../types/models'
 
 describe('InMemoryStorageProvider', () => {
@@ -57,16 +58,20 @@ describe('InMemoryStorageProvider', () => {
     await provider.saveOrganization(organization)
     await provider.savePlan(plan)
     await provider.saveAIInteraction(interaction)
+    const planning = buildStrategicPlanning(createEmptyPlanning(organization.id, plan.id))
+    await provider.saveStrategicPlanning(planning)
 
     const storedOrganizations = await provider.getOrganizations()
     expect(storedOrganizations).toEqual([organization])
     expect(storedOrganizations[0]).not.toBe(organization)
     expect(await provider.getPlans()).toEqual([plan])
     expect(await provider.getAIInteractions()).toEqual([interaction])
+    expect(await provider.getStrategicPlannings()).toEqual([planning])
 
     await provider.deleteOrganization(organization.id)
     expect(await provider.getOrganizations()).toEqual([])
     expect(await provider.getPlans()).toEqual([])
     expect(await provider.getAIInteractions()).toEqual([])
+    expect(await provider.getStrategicPlannings()).toEqual([])
   })
 })

@@ -1,12 +1,13 @@
-import type { AIInteraction, AppPreferences, Organization, StrategicPlan } from '../types/models'
+import type { AIInteraction, AppPreferences, Organization, StrategicPlan, StrategicPlanning } from '../types/models'
 import type { StorageProvider } from './StorageProvider'
 
 const DATABASE_NAME = 'gestion-control-estrategico-ia'
-const DATABASE_VERSION = 3
+const DATABASE_VERSION = 4
 const SETTINGS_STORE = 'settings'
 const ORGANIZATIONS_STORE = 'organizations'
 const PLANS_STORE = 'plans'
 const AI_INTERACTIONS_STORE = 'aiInteractions'
+const STRATEGIC_PLANNINGS_STORE = 'strategicPlannings'
 const PREFERENCES_KEY = 'app-preferences'
 
 function requestToPromise<T>(request: IDBRequest<T>) {
@@ -49,6 +50,11 @@ export class IndexedDbStorageProvider implements StorageProvider {
         interactionsStore.createIndex('organizationId', 'organizationId', { unique: false })
         interactionsStore.createIndex('planId', 'planId', { unique: false })
       }
+      if (!database.objectStoreNames.contains(STRATEGIC_PLANNINGS_STORE)) {
+        const planningStore = database.createObjectStore(STRATEGIC_PLANNINGS_STORE, { keyPath: 'id' })
+        planningStore.createIndex('organizationId', 'organizationId', { unique: false })
+        planningStore.createIndex('planId', 'planId', { unique: true })
+      }
     })
 
     this.database = await requestToPromise(request)
@@ -77,7 +83,7 @@ export class IndexedDbStorageProvider implements StorageProvider {
   }
 
   async deleteOrganization(id: Organization['id']) {
-    const transaction = this.getTransaction([ORGANIZATIONS_STORE, PLANS_STORE, AI_INTERACTIONS_STORE], 'readwrite')
+    const transaction = this.getTransaction([ORGANIZATIONS_STORE, PLANS_STORE, AI_INTERACTIONS_STORE, STRATEGIC_PLANNINGS_STORE], 'readwrite')
     transaction.objectStore(ORGANIZATIONS_STORE).delete(id)
 
     const plansIndex = transaction.objectStore(PLANS_STORE).index('organizationId')
@@ -89,6 +95,7 @@ export class IndexedDbStorageProvider implements StorageProvider {
       cursor.continue()
     })
     this.deleteByIndex(transaction.objectStore(AI_INTERACTIONS_STORE).index('organizationId'), id)
+    this.deleteByIndex(transaction.objectStore(STRATEGIC_PLANNINGS_STORE).index('organizationId'), id)
     await transactionToPromise(transaction)
   }
 
@@ -103,9 +110,10 @@ export class IndexedDbStorageProvider implements StorageProvider {
   }
 
   async deletePlan(id: StrategicPlan['id']) {
-    const transaction = this.getTransaction([PLANS_STORE, AI_INTERACTIONS_STORE], 'readwrite')
+    const transaction = this.getTransaction([PLANS_STORE, AI_INTERACTIONS_STORE, STRATEGIC_PLANNINGS_STORE], 'readwrite')
     transaction.objectStore(PLANS_STORE).delete(id)
     this.deleteByIndex(transaction.objectStore(AI_INTERACTIONS_STORE).index('planId'), id)
+    this.deleteByIndex(transaction.objectStore(STRATEGIC_PLANNINGS_STORE).index('planId'), id)
     await transactionToPromise(transaction)
   }
 
@@ -116,6 +124,16 @@ export class IndexedDbStorageProvider implements StorageProvider {
   async saveAIInteraction(interaction: AIInteraction) {
     const transaction = this.getTransaction(AI_INTERACTIONS_STORE, 'readwrite')
     transaction.objectStore(AI_INTERACTIONS_STORE).put(interaction)
+    await transactionToPromise(transaction)
+  }
+
+  async getStrategicPlannings() {
+    return requestToPromise(this.getStore(STRATEGIC_PLANNINGS_STORE, 'readonly').getAll()) as Promise<StrategicPlanning[]>
+  }
+
+  async saveStrategicPlanning(planning: StrategicPlanning) {
+    const transaction = this.getTransaction(STRATEGIC_PLANNINGS_STORE, 'readwrite')
+    transaction.objectStore(STRATEGIC_PLANNINGS_STORE).put(planning)
     await transactionToPromise(transaction)
   }
 

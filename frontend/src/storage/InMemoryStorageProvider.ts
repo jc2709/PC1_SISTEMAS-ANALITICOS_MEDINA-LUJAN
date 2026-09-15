@@ -1,4 +1,4 @@
-import type { AIInteraction, AppPreferences, Organization, StrategicPlan } from '../types/models'
+import type { AIInteraction, AppPreferences, Organization, StrategicPlan, StrategicPlanning } from '../types/models'
 import type { StorageProvider } from './StorageProvider'
 
 export class InMemoryStorageProvider implements StorageProvider {
@@ -7,6 +7,7 @@ export class InMemoryStorageProvider implements StorageProvider {
   private organizations = new Map<string, Organization>()
   private plans = new Map<string, StrategicPlan>()
   private aiInteractions = new Map<string, AIInteraction>()
+  private strategicPlannings = new Map<string, StrategicPlanning>()
 
   async initialize() {
     return Promise.resolve()
@@ -36,6 +37,9 @@ export class InMemoryStorageProvider implements StorageProvider {
     for (const [interactionId, interaction] of this.aiInteractions) {
       if (interaction.organizationId === id) this.aiInteractions.delete(interactionId)
     }
+    for (const [planningId, planning] of this.strategicPlannings) {
+      if (planning.organizationId === id) this.strategicPlannings.delete(planningId)
+    }
   }
 
   async getPlans() {
@@ -51,6 +55,9 @@ export class InMemoryStorageProvider implements StorageProvider {
     for (const [interactionId, interaction] of this.aiInteractions) {
       if (interaction.planId === id) this.aiInteractions.delete(interactionId)
     }
+    for (const [planningId, planning] of this.strategicPlannings) {
+      if (planning.planId === id) this.strategicPlannings.delete(planningId)
+    }
   }
 
   async getAIInteractions() {
@@ -59,6 +66,14 @@ export class InMemoryStorageProvider implements StorageProvider {
 
   async saveAIInteraction(interaction: AIInteraction) {
     this.aiInteractions.set(interaction.id, cloneAIInteraction(interaction))
+  }
+
+  async getStrategicPlannings() {
+    return Array.from(this.strategicPlannings.values(), cloneStrategicPlanning)
+  }
+
+  async saveStrategicPlanning(planning: StrategicPlanning) {
+    this.strategicPlannings.set(planning.id, cloneStrategicPlanning(planning))
   }
 }
 
@@ -83,4 +98,8 @@ function cloneAIInteraction(interaction: AIInteraction): AIInteraction {
       priorities: [...interaction.finalContent.priorities],
     } : null,
   }
+}
+
+function cloneStrategicPlanning(planning: StrategicPlanning): StrategicPlanning {
+  return structuredClone(planning)
 }

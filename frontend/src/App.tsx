@@ -6,7 +6,7 @@ import { AppShell } from './layouts/AppShell'
 import { HomePage } from './pages/HomePage'
 import { AIPage } from './pages/AIPage'
 import { OrganizationsPage } from './pages/OrganizationsPage'
-import { PlansPage } from './pages/PlansPage'
+import { PlanningHubPage } from './pages/PlanningHubPage'
 import { SettingsPage } from './pages/SettingsPage'
 
 export type NavigationItem =
@@ -37,7 +37,7 @@ function App() {
       {activeItem === 'Organización' ? (
         <OrganizationsPage isLoading={workspace.isLoading} mode={workspace.mode} onDelete={workspace.deleteOrganization} onSave={workspace.saveOrganization} organizations={workspace.organizations} plans={workspace.plans} warning={workspace.warning} />
       ) : activeItem === 'Planeamiento' ? (
-        <PlansPage isLoading={workspace.isLoading} mode={workspace.mode} onDelete={workspace.deletePlan} onRequestOrganization={() => void setLastSection('Organización')} onSave={workspace.savePlan} organizations={workspace.organizations} plans={workspace.plans} warning={workspace.warning} />
+        <PlanningHubPage aiInteractions={workspace.aiInteractions} isLoading={workspace.isLoading} mode={workspace.mode} onDeletePlan={workspace.deletePlan} onRequestOrganization={() => void setLastSection('Organización')} onSavePlan={workspace.savePlan} onSavePlanning={workspace.saveStrategicPlanning} organizations={workspace.organizations} plans={workspace.plans} strategicPlannings={workspace.strategicPlannings} warning={workspace.warning} />
       ) : activeItem === 'IA' ? (
         <AIPage apiBaseUrl={preferences.aiApiBaseUrl} connection={ai.connection} interactions={workspace.aiInteractions} onAnalyze={ai.analyze} onConfigure={() => void setLastSection('Configuración')} onRefresh={ai.refresh} onSaveInteraction={workspace.saveAIInteraction} organizations={workspace.organizations} plans={workspace.plans} />
       ) : activeItem === 'Configuración' ? (

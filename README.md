@@ -16,7 +16,7 @@ Construir una aplicación ejecutiva que conecte organizaciones, planes, objetivo
 - **Persistencia local:** abstracción común con IndexedDB; SQLite queda reservado para una fase posterior si el alcance lo requiere.
 - **IA:** API propia desplegable en Vercel que protege la clave de Gemini, valida respuestas estructuradas y mantiene cada propuesta bajo decisión humana.
 
-Hasta la Fase 4 hay frontend, persistencia local, organizaciones, planes, backend seguro para Gemini, control humano de propuestas y bitácora de IA. El frontend y el backend están desplegados en Vercel; la generación real con Gemini se habilita al configurar la clave privada en Vercel.
+Hasta la Fase 5 hay frontend, persistencia local, organizaciones, planes, backend seguro para Gemini, control humano de propuestas, bitácora de IA y un flujo completo de formulación estratégica. El frontend y el backend están desplegados en Vercel y la generación real funciona con una cadena de modelos Gemini de contingencia.
 
 ## Estructura actual
 
@@ -73,8 +73,8 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 | 1 | Shell visual y almacenamiento mínimo | Completada |
 | 2 | Prototipo HTML local y prototipo EXE | Completada con observación |
 | 3 | Organizaciones y planes | Completada |
-| 4 | Integración Gemini y backend Vercel | Completada con configuración externa pendiente |
-| 5 | Planeamiento estratégico | Pendiente |
+| 4 | Integración Gemini y backend Vercel | Completada |
+| 5 | Planeamiento estratégico | Completada |
 | 6 | Balanced Scorecard | Pendiente |
 | 7 | Iniciativas y Gantt | Pendiente |
 | 8 | Simulación multiperiodo/multiescenario | Pendiente |
@@ -86,9 +86,9 @@ El resultado de producción queda en `frontend/dist/`. La apertura directa media
 
 ## Estado actual
 
-**Fase 4 — Integración Gemini y backend Vercel:** el módulo IA permite configurar la URL del backend, verificar su estado, solicitar un análisis estratégico estructurado y aprobar, editar o rechazar la propuesta. La clave permanece únicamente en Vercel y la bitácora se conserva en IndexedDB local.
+**Fase 5 — Planeamiento estratégico:** cada plan dispone de un espacio de formulación con Preparación, Diagnóstico FODA y hechos críticos, Identidad y Elección estratégica. Cada etapa tiene estado propio y el contenido se conserva en IndexedDB. Un diagnóstico de IA solo se incorpora mediante la acción explícita `Incorporar al plan` después de haber sido aprobado por el usuario.
 
-Consulte [docs/evidencias/FASE_04.md](docs/evidencias/FASE_04.md) para ver las decisiones y pruebas, y [docs/manual/CONFIGURACION_GEMINI.md](docs/manual/CONFIGURACION_GEMINI.md) para habilitar la conexión real sin exponer secretos.
+Consulte [docs/evidencias/FASE_05.md](docs/evidencias/FASE_05.md) para ver las decisiones y pruebas, y [docs/manual/CONFIGURACION_GEMINI.md](docs/manual/CONFIGURACION_GEMINI.md) para revisar la conexión sin exponer secretos.
 
 ## Backend Gemini
 
