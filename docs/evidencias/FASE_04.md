@@ -40,7 +40,7 @@ Sin un backend desplegado puedes abrir el módulo IA, consultar su estado, confi
 ## Archivos principales
 
 - `api/ai/strategic-analysis.ts`
-- `api/_lib/strategicAnalysis.ts`
+- `backend/ai/strategicAnalysis.ts`
 - `vercel.json`
 - `tsconfig.api.json`
 - `frontend/src/pages/AIPage.tsx`

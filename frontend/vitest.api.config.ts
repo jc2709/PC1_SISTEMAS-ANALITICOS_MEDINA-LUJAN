@@ -4,6 +4,6 @@ export default defineConfig({
   root: '..',
   test: {
     environment: 'node',
-    include: ['api/**/*.test.ts'],
+    include: ['backend/**/*.test.ts'],
   },
 })

@@ -1,4 +1,4 @@
-import { buildStrategicAnalysisPrompt, extractGeminiText, parseGeminiAnalysis, parseStrategicAnalysisInput, STRATEGIC_ANALYSIS_SCHEMA } from '../_lib/strategicAnalysis.js'
+import { buildStrategicAnalysisPrompt, extractGeminiText, parseGeminiAnalysis, parseStrategicAnalysisInput, STRATEGIC_ANALYSIS_SCHEMA } from '../../backend/ai/strategicAnalysis.js'
 
 const DEFAULT_MODEL = 'gemini-2.5-flash'
 const MAX_REQUEST_BYTES = 30_000

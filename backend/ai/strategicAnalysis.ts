@@ -1,3 +1,4 @@
+// Shared server-side validation and prompt construction for Gemini.
 export interface StrategicAnalysisInput {
   organization: {
     id: string
