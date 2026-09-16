@@ -80,7 +80,7 @@ function normalizePreferences(stored: AppPreferences | null): AppPreferences {
     schemaVersion: 2,
     compactSidebar: Boolean(stored.compactSidebar),
     lastSection: stored.lastSection || 'Inicio',
-    aiApiBaseUrl: typeof stored.aiApiBaseUrl === 'string' ? stored.aiApiBaseUrl : DEFAULT_PREFERENCES.aiApiBaseUrl,
+    aiApiBaseUrl: typeof stored.aiApiBaseUrl === 'string' && stored.aiApiBaseUrl.trim() ? stored.aiApiBaseUrl : getDefaultAIBaseUrl(),
   }
 }
 
