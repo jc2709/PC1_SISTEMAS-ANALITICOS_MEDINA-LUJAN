@@ -5,6 +5,10 @@ import { InMemoryStorageProvider } from '../storage/InMemoryStorageProvider'
 import type { StorageMode, StorageProvider } from '../storage/StorageProvider'
 import type { AppPreferences } from '../types/models'
 
+// La URL es pública y no contiene secretos. Permite que las entregas file://
+// (HTML y EXE portable) encuentren el backend seguro desde el primer inicio.
+const PORTABLE_BACKEND_URL = 'https://pc1-medina-lujan.vercel.app'
+
 const DEFAULT_PREFERENCES: AppPreferences = {
   schemaVersion: 2,
   compactSidebar: false,
@@ -86,5 +90,5 @@ function getDefaultAIBaseUrl() {
   if (typeof window !== 'undefined' && /^https?:$/.test(window.location.protocol) && !['localhost', '127.0.0.1'].includes(window.location.hostname)) {
     return window.location.origin
   }
-  return ''
+  return PORTABLE_BACKEND_URL
 }

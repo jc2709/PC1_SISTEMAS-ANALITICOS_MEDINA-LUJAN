@@ -13,6 +13,8 @@ Copie solamente `GestionControlEstrategicoIA.exe` a cualquier carpeta de Windows
 
 Windows puede mostrar una advertencia de reputación porque el archivo no cuenta con firma digital comercial. No desactive SmartScreen. Verifique que el archivo provenga de la entrega oficial y que su hash coincida con el manifiesto antes de ejecutarlo.
 
+El EXE incluye como URL inicial del backend `https://pc1-medina-lujan.vercel.app`. La clave Gemini permanece únicamente en Vercel. Si se migra el backend a otra URL, puede cambiarse desde Configuración sin volver a instalar la aplicación.
+
 ## Uso del HTML
 
 Abra `GestionControlEstrategicoIA.html` con doble clic. La IA que usa el backend de Vercel requiere internet y las variables configuradas en Vercel. El resto de los módulos funciona localmente.

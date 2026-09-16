@@ -27,8 +27,8 @@ Documentación oficial: <https://vercel.com/docs/environment-variables>
 
 ## 3. Conectar la aplicación
 
-1. Abrir `Configuración`.
-2. Pegar la URL pública de Vercel en `URL del backend`.
+1. Las entregas oficiales incluyen por defecto `https://pc1-medina-lujan.vercel.app` como URL del backend.
+2. Si se usa otro despliegue, abrir `Configuración` y pegar su URL pública en `URL del backend`.
 3. Pulsar `Guardar URL`.
 4. Entrar en `IA` y pulsar el botón de verificación.
 5. El estado esperado es `IA: Conectada`.
