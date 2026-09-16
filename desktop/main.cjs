@@ -53,8 +53,8 @@ function createWindow() {
             resolve(true)
           }
         })
-        const waitForText = (expectedText) => new Promise((resolve) => {
-          const deadline = Date.now() + 5000
+        const waitForText = (expectedText, timeoutMs = 5000) => new Promise((resolve) => {
+          const deadline = Date.now() + timeoutMs
           const checkContent = () => {
             const text = document.body.innerText.replace(/\\s+/g, ' ')
             if (text.includes(expectedText) || Date.now() >= deadline) resolve(text)
@@ -73,6 +73,9 @@ function createWindow() {
         const dashboardText = await waitForText('Dashboard ejecutivo')
         document.querySelector('[aria-label="Reportes"]')?.click()
         const reportsText = await waitForText('Excel, PowerPoint y reportes')
+        document.querySelector('[aria-label="IA"]')?.click()
+        const aiText = await waitForText('Backend seguro disponible.', 15000)
+        const aiStatusText = document.querySelector('[role="status"]')?.innerText.replace(/\s+/g, ' ') ?? 'Estado de IA no encontrado'
         return {
           title: document.title,
           hasHeading: bodyText.includes('GESTIÓN Y CONTROL ESTRATÉGICO IA'),
@@ -82,6 +85,8 @@ function createWindow() {
           hasPlansModule: plansText.includes('Planes estratégicos'),
           hasDashboardModule: dashboardText.includes('Dashboard ejecutivo'),
           hasReportsModule: reportsText.includes('Excel, PowerPoint y reportes'),
+          hasAIConnected: aiText.includes('IA: Conectada') && aiText.includes('Backend seguro disponible.'),
+          aiStatusText,
         }
       })()`)
       finishSmokeTest({ ok: Object.values(result).every(Boolean), ...result })

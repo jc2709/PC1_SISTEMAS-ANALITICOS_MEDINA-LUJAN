@@ -17,4 +17,8 @@ if (failures.length > 0) {
   throw new Error(`El HTML no es autocontenido: ${failures.map(({ label }) => label).join(', ')}`)
 }
 
+if (!/connect-src[^;]*https:\/\/pc1-medina-lujan\.vercel\.app/i.test(html)) {
+  throw new Error('La política de seguridad del HTML no autoriza el backend público de IA.')
+}
+
 console.log(`HTML local verificado: ${outputPath} (${Math.ceil(outputStats.size / 1024)} KiB)`)
